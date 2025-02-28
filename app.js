@@ -80,6 +80,28 @@ app.get('/motion', (req, res) => {
     });
 });
 
+//Delete all for testing
+app.delete('/pill-RESET', (req, res) => {
+    db.run("DELETE FROM pill", (err) => { 
+        if (err) {
+            res.status(500).json({ error: err.message }); 
+        } else {
+            res.status(200).json({ message: 'Deleted successfully.' }); 
+        }
+    });
+});
+
+//Delete all for testing
+app.delete('/motion-RESET', (req, res) => {
+    db.run("DELETE FROM motion", (err) => { 
+        if (err) {
+            res.status(500).json({ error: err.message }); 
+        } else {
+            res.status(200).json({ message: 'Deleted successfully.' }); 
+        }
+    });
+});
+
 /*app.get('/users/:id', (req, res) => {
     db.get(`SELECT * FROM users WHERE id = ?`, [req.params.id], (err, row) => {
         if (err) {
