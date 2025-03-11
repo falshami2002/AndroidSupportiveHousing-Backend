@@ -14,10 +14,14 @@ const db = new sqlite3.Database('./database.db', (err) => {
         console.error(err.message);
     } else {
         console.log('Connected to the SQLite database.');
-        db.run(`CREATE TABLE IF NOT EXISTS pill (
+        db.run(`CREATE TABLE IF NOT EXISTS pillHistory (
             pill_id INTEGER,
             event_type TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        db.run(`CREATE TABLE IF NOT EXISTS pillSchedule (
+            pill_id INTEGER,
+            dispense_time TIME 
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS pot (
             name TEXT,
@@ -33,14 +37,46 @@ const db = new sqlite3.Database('./database.db', (err) => {
 });
 
 //Post pill event
-app.post('/pill', (req, res) => {
+app.post('/pill-history', (req, res) => {
     const { pill_id, event_type } = req.body;
-    db.run(`INSERT INTO pill (pill_id, event_type) VALUES (?, ?)`, [pill_id, event_type], function(err) {
+    db.run(`INSERT INTO pillHistory (pill_id, event_type) VALUES (?, ?)`, [pill_id, event_type], function(err) {
         if (err) {
             res.status(400).json({ error: err.message });
         } else {
             const now = new Date().toISOString()
             res.json({ pill_id: pill_id, event_type: event_type, created_at: now });
+        }
+    });
+});
+
+app.post('/pill-schedule', (req, res) => {
+    const { pill_id, dispense_time } = req.body;
+    db.run(`INSERT INTO pillSchedule (pill_id, dispense_time) VALUES (?, ?)`, [pill_id, dispense_time], function(err) {
+        if (err) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.json({ pill_id: pill_id, dispense_time: dispense_time });
+        }
+    });
+});
+
+//Get all pill events
+app.get('/pill-history', (req, res) => {
+    db.all(`SELECT * FROM pillHistory`, (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(values);
+        }
+    });
+});
+
+app.get('/pill-schedule', (req, res) => {
+    db.all(`SELECT * FROM pillSchedule`, (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(values);
         }
     });
 });
@@ -54,17 +90,6 @@ app.post('/motion', (req, res) => {
         } else {
             const now = new Date().toISOString()
             res.json({ room_id: room_id, event_type: event_type, created_at: now });
-        }
-    });
-});
-
-//Get all pill events
-app.get('/pill', (req, res) => {
-    db.all(`SELECT * FROM pill`, (err, values) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(values);
         }
     });
 });
