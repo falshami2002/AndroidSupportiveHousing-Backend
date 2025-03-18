@@ -81,6 +81,17 @@ app.get('/pill-schedule', (req, res) => {
     });
 });
 
+app.delete('/pill-schedule', (req, res) => {
+    const { pill_id, dispense_time } = req.body;
+    db.run(`DELETE FROM pillSchedule WHERE pill_id = ? AND dispense_time = ?`, [pill_id, dispense_time], function(err) {
+        if (err) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.json({ pill_id: pill_id, dispense_time: dispense_time });
+        }
+    });
+});
+
 //Post motion event
 app.post('/motion', (req, res) => {
     const { room_id, event_type } = req.body;
