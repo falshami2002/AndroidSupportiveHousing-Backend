@@ -94,7 +94,7 @@ app.delete('/current-recipe', (req, res) => {
 //Put current recipe
 app.put('/current-recipe', (req, res) => {
     const {recipe_id, step_order} = req.body;
-    db.run('UPDATE pot SET step_order = ? WHERE recipe_id = ?', [step_order, recipe_id], function(err) {
+    db.run('UPDATE pot SET current_step = ? WHERE recipe_id = ?', [step_order, recipe_id], function(err) {
         if (err) {
             res.status(400).json({error: err.message});
         } else {
