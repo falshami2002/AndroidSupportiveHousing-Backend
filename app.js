@@ -33,16 +33,19 @@ const db = new sqlite3.Database('./database.db', (err) => {
             recipe_id INTEGER,
             current_step INTEGER
         )`);*/
-        db.run(`CREATE TABLE IF NOT EXISTS recipes (
+        db.run("DROP TABLE IF EXISTS recipes", () => {
+            db.run(`CREATE TABLE recipes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT, 
+                estimated_time INTEGER,
+                ingredients TEXT
+            )`);
+        });
+        /*db.run(`CREATE TABLE IF NOT EXISTS recipes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT, 
             estimated_time INTEGER
-        )`);
-        db.run(`CREATE TABLE IF NOT EXISTS recipes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT, 
-            estimated_time INTEGER
-        )`);
+        )`);*/
         db.run(`CREATE TABLE IF NOT EXISTS steps (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER,
@@ -64,7 +67,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
 //Get steps
 app.get('/step', (req, res) => {
     const {recipe_id, step_order} = req.body;
-    db.all(`SELECT FROM steps WHERE recipe_id = ? AND step_order = ?`, [recipe_id, step_order], (err, values) => {
+    db.all(`SELECT * FROM steps WHERE recipe_id = ? AND step_order = ?`, [recipe_id, step_order], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
@@ -76,11 +79,16 @@ app.get('/step', (req, res) => {
 //Get recipe
 app.get('/recipe', (req, res) => {
     const {id} = req.body;
-    db.all(`SELECT FROM recipes WHERE id = ?`, [id], (err, values) => {
+    db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
-            res.status(200).json(values);
+            res.status(200).json({
+                id: values.id,
+                name: values.name,
+                estimated_time: values.estimated_time,
+                ingredients: JSON.parse(values.ingredients)
+            });
         }
     });
 });
