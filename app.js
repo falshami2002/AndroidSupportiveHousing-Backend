@@ -23,7 +23,9 @@ const db = new sqlite3.Database('./database.db', (err) => {
             pill_id INTEGER,
             dispense_time TIME 
         )`);
+        db.run(`DROP TABLE IF EXISTS pot`);
         db.run(`CREATE TABLE IF NOT EXISTS pot (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER,
             current_step INTEGER
         )`);
