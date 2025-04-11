@@ -87,7 +87,7 @@ app.get('/recipe', (req, res) => {
 
 //Delete current recipe
 app.delete('/current-recipe', (req, res) => {
-    db.run(`DELETE * FROM pot`, function(err) {
+    db.run(`DELETE FROM pot`, function(err) {
         if (err) {
             res.status(400).json({ error: err.message });
         } else {
