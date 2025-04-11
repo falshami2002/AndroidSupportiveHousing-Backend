@@ -24,9 +24,28 @@ const db = new sqlite3.Database('./database.db', (err) => {
             dispense_time TIME 
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS pot (
-            name TEXT,
-            email TEXT UNIQUE,    
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            id INTEGER,
+            current_step INTEGER
+        )`);
+        db.run(`CREATE TABLE IF NOT EXISTS recipes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT, 
+            estimated_time INTEGER
+        )`);
+        db.run(`CREATE TABLE IF NOT EXISTS recipes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT, 
+            estimated_time INTEGER
+        )`);
+        db.run(`CREATE TABLE IF NOT EXISTS steps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipe_id INTEGER,
+            step_order INTEGER,
+            name TEXT, 
+            duration INTEGER, 
+            instructions TEXT, 
+            input TEXT, 
+            output TEXT
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS motion (
             room_id INTEGER,
@@ -34,6 +53,76 @@ const db = new sqlite3.Database('./database.db', (err) => {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
     }
+});
+
+//Get steps
+app.get('/step', (req, res) => {
+    const {recipe_id, step_order} = req.body;
+    db.all(`SELECT FROM steps WHERE recipe_id = ? AND step_order = ?`, [recipe_id, step_order], (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(200).json(values);
+        }
+    });
+});
+
+//Get recipe
+app.get('/recipe', (req, res) => {
+    const {id} = req.body;
+    db.all(`SELECT FROM recipes WHERE id = ?`, [id], (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(200).json(values);
+        }
+    });
+});
+
+//Delete current recipe
+app.delete('/pill-schedule', (req, res) => {
+    db.run(`DELETE * FROM pot`, function(err) {
+        if (err) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(200);
+        }
+    });
+});
+
+//Put current recipe
+app.put('/current-recipe', (req, res) => {
+    const {recipe_id, step_order} = req.body;
+    db.run('UPDATE pot SET step_order = ? WHERE recipe_id = ?', [step_order, recipe_id], function(err) {
+        if (err) {
+            res.status(400).json({error: err.message});
+        } else {
+            res.json({recipe_id: recipe_id, step_id: step_order})
+        }
+    })
+});
+
+//Post current recipe
+app.post('/current-recipe', (req, res) => {
+    const {recipe_id, step_order} = req.body;
+    db.run('INSERT INTO pot (id, current_step) VALUES (?, ?)', [recipe_id, step_order], function(err) {
+        if (err) {
+            res.status(400).json({error: err.message});
+        } else {
+            res.json({recipe_id: recipe_id, step_id: step_order})
+        }
+    })
+});
+
+//Get current recipe
+app.get('/current-recipe', (req, res) => {
+    db.all(`SELECT * FROM pot`, (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(values);
+        }
+    });
 });
 
 //Post pill event
