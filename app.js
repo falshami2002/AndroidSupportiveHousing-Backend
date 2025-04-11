@@ -91,7 +91,7 @@ app.delete('/current-recipe', (req, res) => {
         if (err) {
             res.status(400).json({ error: err.message });
         } else {
-            res.status(200);
+            res.status(200).json({result: "all entries deleted"});
         }
     });
 });
