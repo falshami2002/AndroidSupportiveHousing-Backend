@@ -25,7 +25,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
         )`);
         db.run("DROP TABLE IF EXISTS pot", () => {
             db.run(`CREATE TABLE pot (
-                recipe_id INTEGER,
+                recipe_id INTEGER PRIMARY KEY,
                 current_step INTEGER
             )`);
         });
