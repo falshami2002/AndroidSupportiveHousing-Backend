@@ -23,11 +23,10 @@ const db = new sqlite3.Database('./database.db', (err) => {
             pill_id INTEGER,
             dispense_time TIME 
         )`);
-        db.run("DROP TABLE IF EXISTS pot");
-        /*db.run(`CREATE TABLE IF NOT EXISTS pot (
+        db.run(`CREATE TABLE IF NOT EXISTS pot (
             recipe_id INTEGER,
             current_step INTEGER
-        )`);*/
+        )`);
         db.run(`CREATE TABLE IF NOT EXISTS recipes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT, 
@@ -81,7 +80,7 @@ app.get('/recipe', (req, res) => {
 });
 
 //Delete current recipe
-app.delete('/pill-schedule', (req, res) => {
+app.delete('/current-recipe', (req, res) => {
     db.run(`DELETE * FROM pot`, function(err) {
         if (err) {
             res.status(400).json({ error: err.message });
