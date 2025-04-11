@@ -96,7 +96,7 @@ app.get('/recipe', (req, res) => {
 //post recipe
 app.post('/recipe', (req, res) => {
     const {id, name, estimated_time, ingredients} = req.body;
-    db.all(`INSERT INTO recipes (id, name, estimated_time, ingredients) VALUES (?, ?, ?)`, [id, name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
+    db.all(`INSERT INTO recipes (id, name, estimated_time, ingredients) VALUES (?, ?, ?, ?)`, [id, name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
