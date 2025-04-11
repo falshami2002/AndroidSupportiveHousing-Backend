@@ -24,7 +24,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
             dispense_time TIME 
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS pot (
-            id INTEGER,
+            id INTEGER PRIMARY KEY,
             current_step INTEGER
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS recipes (
