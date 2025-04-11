@@ -35,7 +35,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
         )`);*/
         db.run("DROP TABLE IF EXISTS recipes", () => {
             db.run(`CREATE TABLE recipes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY,
                 name TEXT, 
                 estimated_time INTEGER,
                 ingredients TEXT
