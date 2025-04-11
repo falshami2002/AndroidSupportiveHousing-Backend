@@ -35,7 +35,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
         )`);*/
         db.run("DROP TABLE IF EXISTS recipes", () => {
             db.run(`CREATE TABLE recipes (
-                id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT, 
                 estimated_time INTEGER,
                 ingredients TEXT
@@ -95,13 +95,12 @@ app.get('/recipe', (req, res) => {
 
 //post recipe
 app.post('/recipe', (req, res) => {
-    const {id, name, estimated_time, ingredients} = req.body;
-    db.all(`INSERT INTO pot (id, name, estimated_time, ingredients) VALUES (?, ?, ?, ?)`, [id, name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
+    const {name, estimated_time, ingredients} = req.body;
+    db.all(`INSERT INTO pot (name, estimated_time, ingredients) VALUES (?, ?, ?)`, [name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
             res.status(200).json({
-                id: id,
                 name: name,
                 estimated_time: estimated_time,
                 ingredients: ingredients
