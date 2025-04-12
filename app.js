@@ -78,7 +78,7 @@ app.get('/step', (req, res) => {
 
 //Get recipe
 app.get('/recipe', (req, res) => {
-    const {id} = req.body;
+    const {id} = req.query;
     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
