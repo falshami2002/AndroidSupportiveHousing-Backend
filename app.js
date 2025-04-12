@@ -78,16 +78,17 @@ app.get('/step', (req, res) => {
 
 //Get recipe
 app.get('/recipe', (req, res) => {
-    const {id} = req.query;
+    const {id} = req.body;
     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
+            recipe = values[0]
             res.status(200).json({
-                id: values.id,
-                name: values.name,
-                estimated_time: values.estimated_time,
-                ingredients: JSON.parse(values.ingredients)
+                id: recipe.id,
+                name: recipe.name,
+                estimated_time: recipe.estimated_time,
+                ingredients: JSON.parse(recipe.ingredients)
             });
         }
     });
