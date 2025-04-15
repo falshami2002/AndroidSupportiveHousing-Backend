@@ -1,18 +1,18 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
-const fs = require('fs')
+//const fs = require('fs')
 
 const app = express();
 const PORT = 3000;
 
-fs.unlink("./database.db", (err) => {
+/*fs.unlink("./database.db", (err) => {
     if (err) {
       console.error('Could not delete the database:', err.message);
     } else {
       console.log('Database deleted successfully.');
     }
-  });
+  });*/
 
 // Middleware
 app.use(bodyParser.json());
