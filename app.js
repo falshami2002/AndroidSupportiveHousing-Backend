@@ -95,6 +95,7 @@ app.get('/step', (req, res) => {
 //Get recipe
 app.get('/recipe', (req, res) => {
     const {id} = req.body;
+    console.log(id);
     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
         if (err) {
             res.status(500).json({ error: err.message });
