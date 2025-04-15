@@ -95,9 +95,7 @@ app.get('/step', (req, res) => {
 //Get recipe
 app.get('/recipe', (req, res) => {
     const {id} = req.body;
-    console.log(id);
     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
-        console.log(recipeResults);
         if (err) {
             return res.status(500).json({ error: err.message });
         } else if (!recipeResults || recipeResults.length === 0) {
@@ -125,7 +123,7 @@ app.get('/recipe', (req, res) => {
 //post recipe
 app.post('/recipe', (req, res) => {
     const {id, name, estimated_time, ingredients} = req.body;
-    db.all(`INSERT INTO recipes (id, name, estimated_time, ingredients) VALUES (?, ?, ?, ?)`, [id, name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
+    db.run(`INSERT INTO recipes (id, name, estimated_time, ingredients) VALUES (?, ?, ?, ?)`, [id, name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
