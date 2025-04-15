@@ -6,7 +6,7 @@ const fs = require('fs')
 const app = express();
 const PORT = 3000;
 
-fs.unlink(dbPath, (err) => {
+fs.unlink("./database.db", (err) => {
     if (err) {
       console.error('Could not delete the database:', err.message);
     } else {
