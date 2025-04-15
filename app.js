@@ -60,6 +60,26 @@ const db = new sqlite3.Database('./database.db', (err) => {
     }
 });
 
+//post step
+app.post('/step', (req, res) => {
+    const {recipe_id, step_order, name, duration, instructions, input, output} = req.body;
+    db.all(`INSERT INTO steps (recipe_id, step_order, name, duration, instructions, input, output) VALUES (?, ?, ?, ?, ?, ?, ?)`, [recipe_id, step_order, name, duration, instructions, input, output], (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.status(200).json({
+                recipe_id: recipe_id,
+                step_order: step_order,
+                name: name,
+                duration: duration,
+                instructions: instructions,
+                input: input,
+                output: output
+            });
+        }
+    });
+});
+
 //Get steps
 app.get('/step', (req, res) => {
     const {recipe_id, step_order} = req.body;
