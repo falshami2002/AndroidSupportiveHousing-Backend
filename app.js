@@ -1,9 +1,18 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
+const fs = require('fs')
 
 const app = express();
 const PORT = 3000;
+
+fs.unlink(dbPath, (err) => {
+    if (err) {
+      console.error('Could not delete the database:', err.message);
+    } else {
+      console.log('Database deleted successfully.');
+    }
+  });
 
 // Middleware
 app.use(bodyParser.json());
@@ -23,29 +32,16 @@ const db = new sqlite3.Database('./database.db', (err) => {
             pill_id INTEGER,
             dispense_time TIME 
         )`);
-        db.run("DROP TABLE IF EXISTS pot", () => {
-            db.run(`CREATE TABLE pot (
-                recipe_id INTEGER PRIMARY KEY,
-                current_step INTEGER
-            )`);
-        });
-        /*db.run(`CREATE TABLE IF NOT EXISTS pot (
-            recipe_id INTEGER,
+        db.run(`CREATE TABLE pot (
+            recipe_id INTEGER PRIMARY KEY,
             current_step INTEGER
-        )`);*/
-        db.run("DROP TABLE IF EXISTS recipes", () => {
-            db.run(`CREATE TABLE recipes (
-                id INTEGER PRIMARY KEY,
-                name TEXT, 
-                estimated_time INTEGER,
-                ingredients TEXT
-            )`);
-        });
-        /*db.run(`CREATE TABLE IF NOT EXISTS recipes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        )`);
+        db.run(`CREATE TABLE recipes (
+            id INTEGER PRIMARY KEY,
             name TEXT, 
-            estimated_time INTEGER
-        )`);*/
+            estimated_time INTEGER,
+            ingredients TEXT
+        )`);
         db.run(`CREATE TABLE IF NOT EXISTS steps (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER,
