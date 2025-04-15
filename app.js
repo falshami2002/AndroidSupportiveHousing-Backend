@@ -98,7 +98,7 @@ app.get('/recipe', (req, res) => {
     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
         if (err) {
             res.status(500).json({ error: err.message });
-        } else if (!values || values.length === 0) {
+        } else if (!recipeResults || recipeResults.length === 0) {
             res.status(404).json({ error: 'Recipe not found' });
         }
 
