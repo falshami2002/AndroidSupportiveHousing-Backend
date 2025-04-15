@@ -104,7 +104,7 @@ app.get('/recipe', (req, res) => {
 
         const recipe = recipeResults[0];
 
-        db.all(`SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_number ASC`, [id], (err, stepResults) => {
+        db.all(`SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_order ASC`, [id], (err, stepResults) => {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
