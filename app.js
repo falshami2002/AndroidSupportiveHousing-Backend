@@ -97,10 +97,11 @@ app.get('/recipe', (req, res) => {
     const {id} = req.body;
     console.log(id);
     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
+        console.log(recipeResults);
         if (err) {
-            res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: err.message });
         } else if (!recipeResults || recipeResults.length === 0) {
-            res.status(404).json({ error: 'Recipe not found' });
+            return res.status(404).json({ error: 'Recipe not found' });
         }
 
         const recipe = recipeResults[0];
@@ -110,7 +111,7 @@ app.get('/recipe', (req, res) => {
                 return res.status(500).json({ error: err.message });
             }
 
-            res.status(200).json({
+            return res.status(200).json({
                 id: recipe.id,
                 name: recipe.name,
                 estimated_time: recipe.estimated_time,
