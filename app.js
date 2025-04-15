@@ -75,20 +75,28 @@ app.get('/step', (req, res) => {
 //Get recipe
 app.get('/recipe', (req, res) => {
     const {id} = req.body;
-    db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, values) => {
+    db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else if (!values || values.length === 0) {
             res.status(404).json({ error: 'Recipe not found' });
-        } else {
-            recipe = values[0]
+        }
+
+        const recipe = recipeResults[0];
+
+        db.all(`SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_number ASC`, [id], (err, stepResults) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+
             res.status(200).json({
                 id: recipe.id,
                 name: recipe.name,
                 estimated_time: recipe.estimated_time,
-                ingredients: JSON.parse(recipe.ingredients)
+                ingredients: JSON.parse(recipe.ingredients),
+                steps: stepResults
             });
-        }
+        });
     });
 });
 
