@@ -32,11 +32,11 @@ const db = new sqlite3.Database('./database.db', (err) => {
             pill_id INTEGER,
             dispense_time TIME 
         )`);
-        db.run(`CREATE TABLE pot (
+        db.run(`CREATE TABLE IF NOT EXISTS pot (
             recipe_id INTEGER PRIMARY KEY,
             current_step INTEGER
         )`);
-        db.run(`CREATE TABLE recipes (
+        db.run(`CREATE TABLE IF NOT EXISTS recipes (
             id INTEGER PRIMARY KEY,
             name TEXT, 
             estimated_time INTEGER,
