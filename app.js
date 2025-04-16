@@ -60,6 +60,17 @@ const db = new sqlite3.Database('./database.db', (err) => {
     }
 });
 
+//Delete all recipes
+app.delete('/recipe', (req, res) => {
+    db.run(`DELETE FROM recipes`, function(err) {
+        if (err) {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(200).json({result: "all entries deleted"});
+        }
+    });
+});
+
 //post step
 app.post('/step', (req, res) => {
     const {recipe_id, step_order, name, duration, instructions, input, output} = req.body;
