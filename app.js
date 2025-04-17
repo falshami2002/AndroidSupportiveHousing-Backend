@@ -93,7 +93,7 @@ app.post('/step', (req, res) => {
 
 //Get steps
 app.get('/step', (req, res) => {
-    const {recipe_id, step_order} = req.body;
+    const {recipe_id, step_order} = req.query;
     db.all(`SELECT * FROM steps WHERE recipe_id = ? AND step_order = ?`, [recipe_id, step_order], (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -105,7 +105,7 @@ app.get('/step', (req, res) => {
 
 //Get recipe
 app.get('/recipe', (req, res) => {
-    const {id} = req.body;
+    const {id} = req.query;
     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
         if (err) {
             return res.status(500).json({ error: err.message });
