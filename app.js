@@ -1,7 +1,7 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
-//const fs = require('fs')
+const fs = require('fs')
 
 const app = express();
 const PORT = 3000;
