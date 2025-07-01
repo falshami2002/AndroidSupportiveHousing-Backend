@@ -119,7 +119,7 @@ exports.addPillDispensed = async (req, res) => {
 
 async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
   const user = await db.get(
-    `SELECT fcm_token FROM pillDeviceTokens WHERE device_id = ?`,
+    `SELECT * FROM pillDeviceTokens WHERE device_id = ?`,
     [deviceId]
   );
   console.log("fcm from table",user)
