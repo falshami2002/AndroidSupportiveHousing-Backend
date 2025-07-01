@@ -67,3 +67,84 @@ exports.sendSchedulesToHardware = (req, res) => {
         }
     }, 30000);
 }
+
+exports.registerDeviceToken = async (req, res) => {
+    const { device_id, fcm_token } = req.body;
+    if (!device_id || !fcm_token) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token) VALUES (?, ?)`, [deviceId, fcm_token]);
+
+        console.log(`Pill token added: ${device_id} with token ${fcm_token}`);
+
+        res.status(200).json({ message: 'Pill token added successfully' });
+    } catch (err) {
+        console.error('Error saving tokens:', err);
+        res.status(500).json({ error: 'Failed to save token' });
+    }
+}
+
+exports.addPillDispensed = async (req, res) => {
+  const deviceId = req.header('X-Device-ID');
+  const { pill_id, dispense_time, event_type } = req.body;
+
+  if (!deviceId || !pill_id || !dispense_time) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    await db.run(`
+      INSERT INTO pillHistory (device_id, pill_id, dispense_time, event_type)
+      VALUES (?, ?, ?, ?)
+    `, [deviceId, pill_id, dispense_time, event_type || 'auto']);
+
+    console.log(`Pill dispensed: ${pill_id} by device ${deviceId}`);
+
+    // Send push notification to the user
+    await sendPushNotificationToUser(deviceId, pill_id, dispense_time);
+
+    res.status(200).json({ message: 'Pill dispensed recorded successfully' });
+  } catch (err) {
+    console.error('Error saving dispensation:', err);
+    res.status(500).json({ error: 'Failed to record pill dispensation' });
+  }
+}
+
+async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
+  const user = await db.get(
+    `SELECT fcm_token FROM pillDeviceTokens WHERE device_id = ?`,
+    [deviceId]
+  );
+  console.log("fcm from table",user)
+  if (!user?.fcm_token) {
+    console.warn(`No FCM token for device ${deviceId}`);
+    return;
+  }
+
+//   const notification = {
+//     to: user.fcm_token,
+//     notification: {
+//       title: `Pill Dispensed`,
+//       body: `${pill_id} was dispensed at ${dispense_time}`,
+//     },
+//     data: {
+//       pill_id,
+//       dispense_time,
+//       device_id: deviceId,
+//     }
+//   };
+
+//   try {
+//     await axios.post('https://fcm.googleapis.com/fcm/send', notification, {
+//       headers: {
+//         'Authorization': `key=${FCM_SERVER_KEY}`,
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     console.log(`Notification sent to user for device ${deviceId}`);
+//   } catch (error) {
+//     console.error('FCM error:', error.response?.data || error.message);
+//   }
+}

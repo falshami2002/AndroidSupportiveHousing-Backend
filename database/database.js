@@ -1,14 +1,17 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // Initialize SQLite database
-const db = new sqlite3.Database('./database.db', (err) => {
+const db = new sqlite3.Database('./database.db', async (err) => {
     if (err) {
         console.error(err.message);
     } else {
         console.log('Connected to the SQLite database.');
         db.run(`CREATE TABLE IF NOT EXISTS pillHistory (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id TEXT,
             pill_id INTEGER,
             event_type TEXT,
+            dispense_time TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS pillSchedule (
@@ -17,6 +20,10 @@ const db = new sqlite3.Database('./database.db', (err) => {
             pill_id INTEGER,
             dispense_time TIME,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        db.run(`CREATE TABLE IF NOT EXISTS pillDeviceTokens (
+            device_id TEXT PRIMARY KEY,
+            fcm_token TEXT NOT NULL
         )`);
         db.run(`DROP TABLE IF EXISTS pot`, () => {
             db.run(`CREATE TABLE IF NOT EXISTS pot (
@@ -48,7 +55,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
     }
 });
 
-// Utility function to promisify db.all
+// // Utility function to promisify db.all
 // function dbAll(query, params = []) {
 //   return new Promise((resolve, reject) => {
 //     db.all(query, params, (err, rows) => {
@@ -95,7 +102,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
 
 //     for (const table of tables) {
 //       const tableName = table.name;
-//       console.log(`\n📄 Table: ${tableName}`);
+//       console.log(`\nTable: ${tableName}`);
 
 //       const rows = await dbAll(`SELECT * FROM ${tableName};`);
 //       if (rows.length === 0) {

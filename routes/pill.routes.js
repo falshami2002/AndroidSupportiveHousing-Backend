@@ -6,6 +6,8 @@ const db = require('../database/database');
 router.post('/schedule', pillService.addPillSchedule);
 router.get('/schedule', pillService.getPillSchedule);
 router.get('/wait-for-schedule',pillService.sendSchedulesToHardware)
+router.post('/dispensed',pillService.addPillDispensed)
+router.post('/register-device',pillService.registerDeviceToken)
 
 //Post pill event
 router.post('/pill-history', (req, res) => {
