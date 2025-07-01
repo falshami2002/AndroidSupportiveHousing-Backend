@@ -49,35 +49,35 @@ const db = new sqlite3.Database('./database.db', (err) => {
 });
 
 // Utility function to promisify db.all
-function dbAll(query, params = []) {
-  return new Promise((resolve, reject) => {
-    db.all(query, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
-}
+// function dbAll(query, params = []) {
+//   return new Promise((resolve, reject) => {
+//     db.all(query, params, (err, rows) => {
+//       if (err) reject(err);
+//       else resolve(rows);
+//     });
+//   });
+// }
 
-async function printTablesAndColumns() {
-  try {
-    const tables = await dbAll(
-      `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';`
-    );
+// async function printTablesAndColumns() {
+//   try {
+//     const tables = await dbAll(
+//       `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';`
+//     );
 
-    for (const table of tables) {
-      console.log(`\nTable: ${table.name}`);
+//     for (const table of tables) {
+//       console.log(`\nTable: ${table.name}`);
 
-      const columns = await dbAll(`PRAGMA table_info(${table.name});`);
-      columns.forEach((col) => {
-        console.log(`  - ${col.name} (${col.type})`);
-      });
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
+//       const columns = await dbAll(`PRAGMA table_info(${table.name});`);
+//       columns.forEach((col) => {
+//         console.log(`  - ${col.name} (${col.type})`);
+//       });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//   }
+// }
 
-printTablesAndColumns();
+// printTablesAndColumns();
 // function dbAll(query, params = []) {
 //   return new Promise((resolve, reject) => {
 //     db.all(query, params, (err, rows) => {
