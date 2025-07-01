@@ -11,20 +11,20 @@ router.post('/register-device',pillService.registerDeviceToken)
 router.get('/register-device',pillService.getDeviceTokens)
 
 //Post pill event
-router.post('/pill-history', (req, res) => {
-    const { pill_id, event_type } = req.body;
-    db.run(`INSERT INTO pillHistory (pill_id, event_type) VALUES (?, ?)`, [pill_id, event_type], function(err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        } else {
-            const now = new Date().toISOString()
-            res.json({ pill_id: pill_id, event_type: event_type, created_at: now });
-        }
-    });
-});
+// router.post('/pill-history', (req, res) => {
+//     const { pill_id, event_type } = req.body;
+//     db.run(`INSERT INTO pillHistory (pill_id, event_type) VALUES (?, ?)`, [pill_id, event_type], function(err) {
+//         if (err) {
+//             res.status(400).json({ error: err.message });
+//         } else {
+//             const now = new Date().toISOString()
+//             res.json({ pill_id: pill_id, event_type: event_type, created_at: now });
+//         }
+//     });
+// });
 
 //Get all pill events
-router.get('/pill-history', (req, res) => {
+router.get('/history', (req, res) => {
     db.all(`SELECT * FROM pillHistory`, (err, values) => {
         if (err) {
             res.status(500).json({ error: err.message });

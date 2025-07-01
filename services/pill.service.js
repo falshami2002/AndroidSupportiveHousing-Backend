@@ -79,19 +79,14 @@ exports.sendSchedulesToHardware = (req, res) => {
 }
 
 exports.registerDeviceToken = async (req, res) => {
-    console.log("req",req.body)
     const { device_id, fcm_token } = req.body;
     if (!device_id || !fcm_token) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
         await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token) VALUES (?, ?)`, [device_id, fcm_token]);
-
-        console.log(`Pill token added: ${device_id} with token ${fcm_token}`);
-
         res.status(200).json({ message: 'Pill token added successfully' });
     } catch (err) {
-        console.error('Error saving tokens:', err);
         res.status(500).json({ error: 'Failed to save token' });
     }
 }
