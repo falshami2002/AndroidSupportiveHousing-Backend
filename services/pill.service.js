@@ -79,13 +79,13 @@ exports.sendSchedulesToHardware = (req, res) => {
 }
 
 exports.registerDeviceToken = async (req, res) => {
-    console.log("req",req)
+    console.log("req",req.body)
     const { device_id, fcm_token } = req.body;
     if (!device_id || !fcm_token) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
-        await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token) VALUES (?, ?)`, [deviceId, fcm_token]);
+        await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token) VALUES (?, ?)`, [device_id, fcm_token]);
 
         console.log(`Pill token added: ${device_id} with token ${fcm_token}`);
 
