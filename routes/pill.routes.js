@@ -32,7 +32,7 @@ router.post('/schedule', (req, res) => {
         if (err) {
             res.status(400).json({ error: err.message });
         } else {
-            res.json({ deviceId , pill_id, dispense_time });
+            res.json({ pill_id, dispense_time });
         }
     });
 });
