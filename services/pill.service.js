@@ -43,6 +43,16 @@ exports.getPillSchedule = (req, res) => {
     });
 }
 
+exports.getDeviceTokens = (req, res) => {
+    db.all(`SELECT * FROM pillDeviceTokens`, (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(values);
+        }
+    });
+}
+
 exports.sendSchedulesToHardware = (req, res) => {
     const deviceId = req.header('X-Device-ID');
     if (!deviceId) return res.status(400).json({ error: 'Missing X-Device-ID' });
@@ -69,6 +79,7 @@ exports.sendSchedulesToHardware = (req, res) => {
 }
 
 exports.registerDeviceToken = async (req, res) => {
+    console.log("req",req)
     const { device_id, fcm_token } = req.body;
     if (!device_id || !fcm_token) {
         return res.status(400).json({ error: 'Missing required fields' });
