@@ -125,38 +125,38 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                 return;
             }
             console.log("fcm from tableqnqn", row); // Actual row object or undefined
+            if (!row || !row.fcm_token) {
+                console.warn(`No FCM token found for device ${deviceId}`);
+                return res.status(404).json({ message: "FCM token not found for device" });
+            }
+
+            const message = {
+                token: row.fcm_token,
+                notification: {
+                    title: 'Pill Dispensed',
+                    body: `${pill_id} was dispensed at ${dispense_time}`,
+                },
+                data: {
+                    pill_id,
+                    dispense_time,
+                    device_id: deviceId,
+                },
+            };
+
+            // Send push notification
+            admin
+                .messaging()
+                .send(message)
+                .then((response) => {
+                    console.log(`Notification sent: ${response}`);
+                    res.status(200).json({ message: 'Notification sent', response });
+                })
+                .catch((error) => {
+                    console.error("FCM Error:", error);
+                    res.status(500).json({ error: "Failed to send notification", details: error.message });
+                });
         }
     );
-    // if (!user?.fcm_token) {
-    //     console.warn(`No FCM token for device ${deviceId}`);
-    //     return;
-    // }
-
-
-//   const notification = {
-//     to: user.fcm_token,
-//     notification: {
-//       title: `Pill Dispensed`,
-//       body: `${pill_id} was dispensed at ${dispense_time}`,
-//     },
-//     data: {
-//       pill_id,
-//       dispense_time,
-//       device_id: deviceId,
-//     }
-//   };
-
-//   try {
-//     await axios.post('https://fcm.googleapis.com/fcm/send', notification, {
-//       headers: {
-//         'Authorization': `key=${FCM_SERVER_KEY}`,
-//         'Content-Type': 'application/json'
-//       }
-//     });
-
-//     console.log(`Notification sent to user for device ${deviceId}`);
-//   } catch (error) {
-//     console.error('FCM error:', error.response?.data || error.message);
-//   }
+    
 console.log("everything worked")
 }
