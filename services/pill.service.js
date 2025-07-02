@@ -127,7 +127,7 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
             console.log("fcm from tableqnqn", row); // Actual row object or undefined
             if (!row || !row.fcm_token) {
                 console.warn(`No FCM token found for device ${deviceId}`);
-                return res.status(404).json({ message: "FCM token not found for device" });
+                console.log("FCM token not found for device" );
             }
 
             const message = {
@@ -149,11 +149,11 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                 .send(message)
                 .then((response) => {
                     console.log(`Notification sent: ${response}`);
-                    res.status(200).json({ message: 'Notification sent', response });
+                    
                 })
                 .catch((error) => {
                     console.error("FCM Error:", error);
-                    res.status(500).json({ error: "Failed to send notification", details: error.message });
+                    
                 });
         }
     );
