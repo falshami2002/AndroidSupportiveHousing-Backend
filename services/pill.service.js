@@ -127,10 +127,10 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
             console.log("fcm from tableqnqn", row); // Actual row object or undefined
         }
     );
-    if (!user?.fcm_token) {
-        console.warn(`No FCM token for device ${deviceId}`);
-        return;
-    }
+    // if (!user?.fcm_token) {
+    //     console.warn(`No FCM token for device ${deviceId}`);
+    //     return;
+    // }
 
 
 //   const notification = {
