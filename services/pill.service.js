@@ -138,9 +138,9 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                     body: `${pill_id} was dispensed at ${dispense_time}`,
                 },
                 data: {
-                    pill_id,
-                    dispense_time,
-                    device_id: deviceId,
+                    pill_id: String(pill_id),
+                    dispense_time: String(dispense_time),
+                    device_id: String(deviceId),
                 },
             };
 
