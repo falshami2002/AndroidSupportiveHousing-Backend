@@ -118,20 +118,20 @@ exports.addPillDispensed = async (req, res) => {
 }
 
 async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
-  const user = await db.get(
+  const user = await db.run(
     `SELECT * FROM pillDeviceTokens WHERE device_id = ?`,
     [deviceId]
   );
   console.log("fcm from table",user)
-  db.all(`SELECT * FROM pillDeviceTokens`, (err, values) => {
-        if (err) {
-            // res.status(500).json({ error: err.message });
-            console.log("Err here her here")
-        } else {
-            // res.json(values);
-            console.log("from test",values)
-        }
-    });
+//   db.all(`SELECT * FROM pillDeviceTokens`, (err, values) => {
+//         if (err) {
+//             // res.status(500).json({ error: err.message });
+//             console.log("Err here her here")
+//         } else {
+//             // res.json(values);
+//             console.log("from test",values)
+//         }
+//     });
   if (!user?.fcm_token) {
     console.warn(`No FCM token for device ${deviceId}`);
     return;
