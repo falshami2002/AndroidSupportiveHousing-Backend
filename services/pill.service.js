@@ -1,4 +1,5 @@
 const db = require('../database/database');
+const admin = require('../firebaseInit')
 const { pendingClients, scheduleQueue } = require('../utils/global');
 
 exports.addPillSchedule = (req, res) => {
