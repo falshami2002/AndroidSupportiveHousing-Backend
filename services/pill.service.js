@@ -118,25 +118,19 @@ exports.addPillDispensed = async (req, res) => {
 }
 
 async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
-  const user = await db.get(
-  `SELECT * FROM pillDeviceTokens WHERE device_id = ?`,
-  [deviceId]
-);
-// console.log("fcm from table", user);
-  console.log("fcm from table",user)
-//   db.all(`SELECT * FROM pillDeviceTokens`, (err, values) => {
-//         if (err) {
-//             // res.status(500).json({ error: err.message });
-//             console.log("Err here her here")
-//         } else {
-//             // res.json(values);
-//             console.log("from test",values)
-//         }
-//     });
-  if (!user?.fcm_token) {
-    console.warn(`No FCM token for device ${deviceId}`);
-    return;
-  }
+    db.get(`SELECT * FROM pillDeviceTokens WHERE device_id = ?`,[deviceId],(err, row) => 
+        {
+            if (err) {
+                console.error("DB Error:", err);
+                return;
+            }
+            console.log("fcm from tableqnqn", row); // Actual row object or undefined
+        }
+    );
+    if (!user?.fcm_token) {
+        console.warn(`No FCM token for device ${deviceId}`);
+        return;
+    }
 
 
 //   const notification = {
@@ -164,4 +158,5 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
 //   } catch (error) {
 //     console.error('FCM error:', error.response?.data || error.message);
 //   }
+console.log("everything worked")
 }
