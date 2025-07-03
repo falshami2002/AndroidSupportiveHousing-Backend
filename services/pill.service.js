@@ -2,8 +2,31 @@ const db = require('../database/database');
 const admin = require('../firebaseInit')
 const { pendingClients, scheduleQueue } = require('../utils/global');
 
+exports.registerDeviceToken = async (req, res) => {
+    const { device_id, fcm_token } = req.body;
+    if (!device_id || !fcm_token) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token) VALUES (?, ?)`, [device_id, fcm_token]);
+        res.status(200).json({ message: 'Pill token added successfully' });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to save token' });
+    }
+}
+
+exports.getDeviceTokens = (req, res) => {
+    db.all(`SELECT * FROM pillDeviceTokens`, (err, values) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(values);
+        }
+    });
+}
+
 exports.addPillSchedule = (req, res) => {
-    console.log("in routeX")
+    console.log("in routeX posting schedule")
     const deviceId = req.header('X-Device-ID');  
     const { pill_id, dispense_time } = req.body;
     console.log("all data",deviceId,pill_id,dispense_time)
@@ -14,22 +37,24 @@ exports.addPillSchedule = (req, res) => {
     // Save to in-memory queue
     if (!scheduleQueue[deviceId]) scheduleQueue[deviceId] = [];
     scheduleQueue[deviceId].push(schedule);
-
+    console.log("schedules",scheduleQueue)
+    console.log("pendingclient",pendingClients)
     // Respond to all waiting Arduino clients (long-polling)
     const clients = pendingClients[deviceId] || [];
     while (clients.length > 0) {
         const resClient = clients.shift();
+        console.log("resclie",resClient)
         resClient.json({ schedules: [...scheduleQueue[deviceId]] });  // Send full list
     }
 
     // Clear after notifying
     scheduleQueue[deviceId] = [];
-
+    console.log("then running db call")
     db.run(`INSERT INTO pillSchedule (device_id, pill_id, dispense_time) VALUES (?, ?, ?)`, [deviceId ,pill_id, dispense_time], function(err) {
         if (err) {
             res.status(400).json({ error: err.message });
         } else {
-            res.json({ pill_id, dispense_time });
+            res.json({ message: 'Pill schedule added successfully' });
         }
     });
 };
@@ -44,17 +69,8 @@ exports.getPillSchedule = (req, res) => {
     });
 }
 
-exports.getDeviceTokens = (req, res) => {
-    db.all(`SELECT * FROM pillDeviceTokens`, (err, values) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(values);
-        }
-    });
-}
-
 exports.sendSchedulesToHardware = (req, res) => {
+    console.log("waiting for schedules")
     const deviceId = req.header('X-Device-ID');
     if (!deviceId) return res.status(400).json({ error: 'Missing X-Device-ID' });
 
@@ -79,18 +95,7 @@ exports.sendSchedulesToHardware = (req, res) => {
     }, 30000);
 }
 
-exports.registerDeviceToken = async (req, res) => {
-    const { device_id, fcm_token } = req.body;
-    if (!device_id || !fcm_token) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
-    try {
-        await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token) VALUES (?, ?)`, [device_id, fcm_token]);
-        res.status(200).json({ message: 'Pill token added successfully' });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to save token' });
-    }
-}
+
 
 exports.addPillDispensed = async (req, res) => {
   const deviceId = req.header('X-Device-ID');
@@ -158,6 +163,4 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                 });
         }
     );
-    
-console.log("everything worked")
 }
