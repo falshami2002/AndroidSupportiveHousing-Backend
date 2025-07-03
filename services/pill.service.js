@@ -26,10 +26,9 @@ exports.getDeviceTokens = (req, res) => {
 }
 
 exports.addPillSchedule = (req, res) => {
-    console.log("in routeX posting schedule")
     const deviceId = req.header('X-Device-ID');  
     const { pill_id, dispense_time } = req.body;
-    console.log("all data",deviceId,pill_id,dispense_time)
+    
     if (!deviceId) {
         return res.status(400).json({ error: "Missing device ID" });
     }
@@ -38,19 +37,17 @@ exports.addPillSchedule = (req, res) => {
     if (!scheduleQueue[deviceId]) scheduleQueue[deviceId] = [];
     const schedule = { pill_id, dispense_time };
     scheduleQueue[deviceId].push(schedule);
-    console.log("schedules",scheduleQueue)
-    console.log("pendingclient",pendingClients)
+
     // Respond to all waiting Arduino clients (long-polling)
     const clients = pendingClients[deviceId] || [];
     while (clients.length > 0) {
         const resClient = clients.shift();
-        console.log("resclie",resClient)
         resClient.json({ schedules: [...scheduleQueue[deviceId]] });  // Send full list
     }
 
     // Clear after notifying
     scheduleQueue[deviceId] = [];
-    console.log("then running db call")
+    
     db.run(`INSERT INTO pillSchedule (device_id, pill_id, dispense_time) VALUES (?, ?, ?)`, [deviceId ,pill_id, dispense_time], function(err) {
         if (err) {
             res.status(400).json({ error: err.message });
@@ -71,7 +68,6 @@ exports.getPillSchedule = (req, res) => {
 }
 
 exports.sendSchedulesToHardware = (req, res) => {
-    console.log("waiting for schedules")
     const deviceId = req.header('X-Device-ID');
     if (!deviceId) return res.status(400).json({ error: 'Missing X-Device-ID' });
 
@@ -131,7 +127,6 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                 console.error("DB Error:", err);
                 return;
             }
-            console.log("fcm from tableqnqn", row); // Actual row object or undefined
             if (!row || !row.fcm_token) {
                 console.warn(`No FCM token found for device ${deviceId}`);
                 console.log("FCM token not found for device" );
