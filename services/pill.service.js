@@ -36,6 +36,7 @@ exports.addPillSchedule = (req, res) => {
 
     // Save to in-memory queue
     if (!scheduleQueue[deviceId]) scheduleQueue[deviceId] = [];
+    const schedule = { pill_id, dispense_time };
     scheduleQueue[deviceId].push(schedule);
     console.log("schedules",scheduleQueue)
     console.log("pendingclient",pendingClients)
