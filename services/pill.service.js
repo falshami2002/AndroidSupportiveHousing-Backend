@@ -42,9 +42,13 @@ exports.addPillSchedule = async (req, res) => {
             dispense_time: new Date(timestamp) // or keep as timestamp if needed
         }));
         console.log("entries created",entries)
+    const payload = schedules.map(timestamp => ({
+            pill_id: uuidv4(),
+            dispense_time: formatTimestamp(timestamp) // or keep as timestamp if needed
+        }));
     // Forward to VPS proxy
     try {
-        await axios.post('http://128.199.7.31:3000/api/send-schedule', entries[0]);
+        await axios.post('http://128.199.7.31:3000/api/send-schedule', payload[0]);
         // res.send("Schedule forwarded to hardware");
     } catch (err) {
         console.error("Failed to send to VPS:", err.message);
@@ -80,7 +84,18 @@ exports.addPillSchedule = async (req, res) => {
         });
     });
 };
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
 
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}/${month}/${year}; ${hours}:${minutes}`;
+}
 exports.getPillSchedule = (req, res) => {
     db.all(`SELECT * FROM pillSchedule`, (err, values) => {
         if (err) {
