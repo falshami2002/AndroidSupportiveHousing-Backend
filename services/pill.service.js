@@ -37,14 +37,11 @@ exports.addPillSchedule = async (req, res) => {
     if (!Array.isArray(schedules) || schedules.length === 0) {
         return res.status(400).json({ error: "Missing or empty schedules" });
     }
-    const entries = schedules.map(timestamp => ({
-            pill_id: uuidv4(),
-            dispense_time: new Date(timestamp) // or keep as timestamp if needed
-        }));
-        console.log("entries created",entries)
+
+        // console.log("received request",schedules)
     const payload = schedules.map(timestamp => ({
             pill_id: uuidv4(),
-            dispense_time: formatTimestamp(timestamp) // or keep as timestamp if needed
+            dispense_time: formatTimestamp12Hour(timestamp) // or keep as timestamp if needed
         }));
     // Forward to VPS proxy
     try {
@@ -67,7 +64,7 @@ exports.addPillSchedule = async (req, res) => {
 
     // Insert all entries one by one
     db.serialize(() => {
-        entries.forEach(entry => {
+        schedules.forEach(entry => {
             insertStmt.run([deviceId, entry.pill_id, entry.dispense_time], err => {
                 if (err) {
                     console.error("Error inserting entry:", err.message);
@@ -84,17 +81,22 @@ exports.addPillSchedule = async (req, res) => {
         });
     });
 };
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
+function formatTimestamp12Hour(timestamp) {
+    const date = new Date(timestamp); // uses local time by default
 
     const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-based
     const year = date.getFullYear();
 
-    const hours = String(date.getHours()).padStart(2, '0');
+    let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
 
-    return `${day}/${month}/${year}; ${hours}:${minutes}`;
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12 in 12-hour format
+    const formattedHours = String(hours).padStart(2, '0');
+
+    return `${day}/${month}/${year}; ${formattedHours}:${minutes}; ${ampm}`;
 }
 exports.getPillSchedule = (req, res) => {
     db.all(`SELECT * FROM pillSchedule`, (err, values) => {
