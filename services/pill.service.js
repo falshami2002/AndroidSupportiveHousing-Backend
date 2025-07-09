@@ -1,6 +1,7 @@
 const db = require('../database/database');
 const admin = require('../firebaseInit');
-const axios = require('axios')
+const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
 // const { pendingClients, scheduleQueue } = require('../utils/global');
 
 exports.registerDeviceToken = async (req, res) => {
