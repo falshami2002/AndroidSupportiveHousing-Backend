@@ -29,7 +29,7 @@ exports.getDeviceTokens = (req, res) => {
 exports.addPillSchedule = async (req, res) => {
     const deviceId = req.header('X-Device-ID');  
     const { schedules } = req.body;
-    console.log("params",deviceId,schedues)
+    console.log("params",deviceId,schedules)
     if (!deviceId) {
         return res.status(400).json({ error: "Missing device ID" });
     }
