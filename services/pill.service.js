@@ -28,25 +28,55 @@ exports.getDeviceTokens = (req, res) => {
 
 exports.addPillSchedule = async (req, res) => {
     const deviceId = req.header('X-Device-ID');  
-    const { pill_id, dispense_time } = req.body;
-    
+    const { schedules } = req.body;
+    console.log("params",deviceId,schedues)
     if (!deviceId) {
         return res.status(400).json({ error: "Missing device ID" });
     }
+    if (!Array.isArray(schedules) || schedules.length === 0) {
+        return res.status(400).json({ error: "Missing or empty schedules" });
+    }
+    const entries = schedules.map(timestamp => ({
+            pill_id: uuidv4(),
+            dispense_time: new Date(timestamp) // or keep as timestamp if needed
+        }));
+        console.log("entries created",entries)
     // Forward to VPS proxy
     try {
-        await axios.post('http://128.199.7.31:3000/api/send-schedule', { pill_id, dispense_time });
+        await axios.post('http://128.199.7.31:3000/api/send-schedule', entries[0]);
         // res.send("Schedule forwarded to hardware");
     } catch (err) {
         console.error("Failed to send to VPS:", err.message);
         // res.status(500).send("Could not forward schedule");
     }
-    db.run(`INSERT INTO pillSchedule (device_id, pill_id, dispense_time) VALUES (?, ?, ?)`, [deviceId ,pill_id, dispense_time], function(err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        } else {
-            res.json({ message: 'Pill schedule added successfully' });
-        }
+    // db.run(`INSERT INTO pillSchedule (device_id, pill_id, dispense_time) VALUES (?, ?, ?)`, [deviceId ,pill_id, dispense_time], function(err) {
+    //     if (err) {
+    //         res.status(400).json({ error: err.message });
+    //     } else {
+    //         res.json({ message: 'Pill schedule added successfully' });
+    //     }
+    // });
+    const insertStmt = db.prepare(
+        `INSERT INTO pillSchedule (device_id, pill_id, dispense_time) VALUES (?, ?, ?)`
+    );
+
+    // Insert all entries one by one
+    db.serialize(() => {
+        entries.forEach(entry => {
+            insertStmt.run([deviceId, entry.pill_id, entry.dispense_time], err => {
+                if (err) {
+                    console.error("Error inserting entry:", err.message);
+                }
+            });
+        });
+
+        insertStmt.finalize(err => {
+            if (err) {
+                return res.status(500).json({ error: "Failed to finalize insert" });
+            }
+
+            res.status(200).json({ message: 'Pill schedule added successfully' });
+        });
     });
 };
 
