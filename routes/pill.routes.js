@@ -5,7 +5,7 @@ const db = require('../database/database');
 
 router.post('/schedule', pillService.addPillSchedule);
 router.get('/schedule', pillService.getPillSchedule);
-// router.get('/wait-for-schedule',pillService.sendSchedulesToHardware)
+router.delete('/schedule', pillService.deleteAllPillSchedules)
 router.post('/dispensed',pillService.addPillDispensed)
 router.post('/register-device',pillService.registerDeviceToken)
 router.get('/register-device',pillService.getDeviceTokens)

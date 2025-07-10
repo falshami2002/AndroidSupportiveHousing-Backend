@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 
 exports.registerDeviceToken = async (req, res) => {
     const { device_id, fcm_token } = req.body;
-    if (!device_id || !fcm_token) {
+    if (device_id == null || !fcm_token) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
@@ -26,6 +26,15 @@ exports.getDeviceTokens = (req, res) => {
         }
     });
 }
+
+exports.deleteAllPillSchedules = (req, res) => {
+    db.run(`DELETE FROM pillSchedule`, function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: 'All pill schedules deleted successfully' });
+    });
+};
 
 exports.addPillSchedule = async (req, res) => {
     const deviceId = req.header('X-Device-ID');  
