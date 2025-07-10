@@ -119,7 +119,7 @@ exports.getPillSchedule = (req, res) => {
             dispense_time: row.dispense_time,
             pill_id: row.pill_id,
             is_dispensed: row.is_dispensed
-        }));
+        })).sort((a, b) => a.dispense_time - b.dispense_time);
 
         res.json(formatted);
     });
