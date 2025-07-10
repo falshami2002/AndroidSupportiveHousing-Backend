@@ -31,7 +31,7 @@ exports.addPillSchedule = async (req, res) => {
     const deviceId = req.header('X-Device-ID');  
     const { schedules } = req.body;
     console.log("params",deviceId,schedules)
-    if (!deviceId) {
+    if (!deviceId || deviceId == null) {
         return res.status(400).json({ error: "Missing device ID" });
     }
     if (!Array.isArray(schedules) || schedules.length === 0) {
@@ -99,12 +99,29 @@ function formatTimestamp12Hour(timestamp) {
     return `${day}/${month}/${year}; ${formattedHours}:${minutes}; ${ampm}`;
 }
 exports.getPillSchedule = (req, res) => {
-    db.all(`SELECT * FROM pillSchedule`, (err, values) => {
+    const deviceId = req.header('X-Device-ID');
+    if (deviceId == null) {
+        return res.status(400).json({ error: 'Missing device ID' });
+    }
+
+    const query = `
+        SELECT dispense_time, pill_id, is_dispensed 
+        FROM pillSchedule 
+        WHERE device_id = ?
+    `;
+
+    db.all(query, [deviceId], (err, rows) => {
         if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(values);
+            return res.status(500).json({ error: err.message });
         }
+
+        const formatted = rows.map(row => ({
+            dispense_time: row.dispense_time,
+            pill_id: row.pill_id,
+            is_dispensed: row.is_dispensed
+        }));
+
+        res.json(formatted);
     });
 }
 
