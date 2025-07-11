@@ -28,7 +28,8 @@ exports.getDeviceTokens = (req, res) => {
 }
 
 exports.deleteAllPillSchedules = (req, res) => {
-    const { pillId } = req.body;
+    // const { pillId } = req.body;
+    const { pillId } = req.params;
     if(pillId){
         console.log("pill id found");
         db.run(`DELETE FROM pillSchedule WHERE pill_id = ?`, [pillId], function(err) {
