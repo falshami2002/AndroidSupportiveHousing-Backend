@@ -28,12 +28,30 @@ exports.getDeviceTokens = (req, res) => {
 }
 
 exports.deleteAllPillSchedules = (req, res) => {
-    db.run(`DELETE FROM pillSchedule`, function (err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json({ message: 'All pill schedules deleted successfully' });
-    });
+    const { pillId } = req.body;
+    if(pillId){
+        console.log("pill id found");
+        db.run(`DELETE FROM pillSchedule WHERE pill_id = ?`, [pillId], function(err) {
+            if (err) {
+                console.error("DB error:", err.message);
+                return res.status(500).json({ error: "Failed to delete pill schedule" });
+            }
+    
+            if (this.changes === 0) {
+                return res.status(404).json({ message: "No schedule found with that pill_id" });
+            }
+    
+            res.json({ message: "Pill schedule deleted successfully" });
+        });
+    }else{
+        console.log("no pill id found")
+        db.run(`DELETE FROM pillSchedule`, function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ message: 'All pill schedules deleted successfully' });
+        });
+    }
 };
 
 exports.addPillSchedule = async (req, res) => {
