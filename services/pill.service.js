@@ -47,14 +47,16 @@ exports.addPillSchedule = async (req, res) => {
         return res.status(400).json({ error: "Missing or empty schedules" });
     }
 
-        // console.log("received request",schedules)
-    const payload = schedules.map(timestamp => ({
-            pill_id: uuidv4(),
-            dispense_time: formatTimestamp12Hour(timestamp) // or keep as timestamp if needed
-        }));
+    const payloadToSend = schedules.map(timestamp =>  formatTimestamp12Hour(timestamp));
+
+        console.log("payload to send",payloadToSend)
+
     // Forward to VPS proxy
     try {
-        await axios.post('http://128.199.7.31:3000/api/send-schedule', payload[0]);
+        await axios.post('http://128.199.7.31:3000/api/send-schedule', {
+            deviceId,
+            schedules: payloadToSend
+        });
         // res.send("Schedule forwarded to hardware");
     } catch (err) {
         console.error("Failed to send to VPS:", err.message);
@@ -91,10 +93,9 @@ exports.addPillSchedule = async (req, res) => {
     });
 };
 function formatTimestamp12Hour(timestamp) {
-    const date = new Date(timestamp); // uses local time by default
-
+    const date = new Date(timestamp);
     const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-based
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
 
     let hours = date.getHours();
@@ -102,7 +103,7 @@ function formatTimestamp12Hour(timestamp) {
     const ampm = hours >= 12 ? 'pm' : 'am';
 
     hours = hours % 12;
-    hours = hours ? hours : 12; // 0 should be 12 in 12-hour format
+    hours = hours ? hours : 12;
     const formattedHours = String(hours).padStart(2, '0');
 
     return `${day}/${month}/${year}; ${formattedHours}:${minutes}; ${ampm}`;
