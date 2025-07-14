@@ -5,13 +5,13 @@ const { v4: uuidv4 } = require('uuid');
 // const { pendingClients, scheduleQueue } = require('../utils/global');
 
 exports.registerDeviceToken = async (req, res) => {
-    const { device_id, fcm_token } = req.body;
-    if (device_id == null || !fcm_token) {
+    const { device_id, fcm_token, device_type } = req.body;
+    if (device_id == null || !fcm_token || !device_type) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
-        await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token) VALUES (?, ?)`, [device_id, fcm_token]);
-        res.status(200).json({ message: 'Pill token added successfully' });
+        await db.run(`INSERT INTO pillDeviceTokens (device_id, fcm_token, device_type) VALUES (?, ?, ?)`, [device_id, fcm_token, device_type]);
+        res.status(200).json({ message: 'Device token added successfully' });
     } catch (err) {
         res.status(500).json({ error: 'Failed to save token' });
     }
@@ -27,8 +27,9 @@ exports.getDeviceTokens = (req, res) => {
     });
 }
 
-exports.deleteAllPillSchedules = (req, res) => {
+exports.deleteAllPillSchedules = async (req, res) => {
     // const { pillId } = req.body;
+    const deviceId = req.header('X-Device-ID');
     const { pillId } = req.params;
     if(pillId){
         console.log("pill id found");
@@ -44,6 +45,14 @@ exports.deleteAllPillSchedules = (req, res) => {
     
             res.json({ message: "Pill schedule deleted successfully" });
         });
+        // try {
+        //     await axios.post('http://128.199.7.31:3000/api/notify-delete', {
+        //         device_id: deviceId,
+        //         pill_id: pillId  need to send schedule
+        //     });
+        // } catch (vpsErr) {
+        //     console.error("Failed to notify VPS of delete:", vpsErr.message);
+        // }
     }else{
         console.log("no pill id found")
         db.run(`DELETE FROM pillSchedule`, function (err) {
@@ -66,7 +75,7 @@ exports.addPillSchedule = async (req, res) => {
         return res.status(400).json({ error: "Missing or empty schedules" });
     }
 
-    const payloadToSend = schedules.map(timestamp =>  formatTimestamp12Hour(timestamp.dispense_time));
+    const payloadToSend = schedules.map(timestamp =>  ({pill_id: timestamp.pill_id, dispense_time: formatTimestamp12Hour(timestamp.dispense_time), pill_slot: entry.pill_slot}));
 
         console.log("payload to send",payloadToSend)
 
@@ -81,21 +90,14 @@ exports.addPillSchedule = async (req, res) => {
         console.error("Failed to send to VPS:", err.message);
         // res.status(500).send("Could not forward schedule");
     }
-    // db.run(`INSERT INTO pillSchedule (device_id, pill_id, dispense_time) VALUES (?, ?, ?)`, [deviceId ,pill_id, dispense_time], function(err) {
-    //     if (err) {
-    //         res.status(400).json({ error: err.message });
-    //     } else {
-    //         res.json({ message: 'Pill schedule added successfully' });
-    //     }
-    // });
     const insertStmt = db.prepare(
-        `INSERT INTO pillSchedule (device_id, pill_id, dispense_time) VALUES (?, ?, ?)`
+        `INSERT INTO pillSchedule (device_id, pill_id, dispense_time, pill_slot) VALUES (?, ?, ?, ?)`
     );
 
     // Insert all entries one by one
     db.serialize(() => {
         schedules.forEach(entry => {
-            insertStmt.run([deviceId, entry.pill_id, entry.dispense_time], err => {
+            insertStmt.run([deviceId, entry.pill_id, entry.dispense_time, entry.pill_slot], err => {
                 if (err) {
                     console.error("Error inserting entry:", err.message);
                 }
@@ -147,7 +149,8 @@ exports.getPillSchedule = (req, res) => {
         const formatted = rows.map(row => ({
             dispense_time: row.dispense_time,
             pill_id: row.pill_id,
-            is_dispensed: row.is_dispensed
+            is_dispensed: row.is_dispensed,
+            pill_slot: row.pill_slot
         })).sort((a, b) => a.dispense_time - b.dispense_time);
 
         res.json(formatted);

@@ -14,12 +14,13 @@ const db = new sqlite3.Database('./database.db', async (err) => {
         //     dispense_time TEXT,
         //     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         // )`);
-        // db.run(`DROP TABLE IF EXISTS pill`);
+        // db.run(`DROP TABLE IF EXISTS pillDeviceTokens`);
         // db.run(`DROP TABLE IF EXISTS pillSchedule`, () => {
             db.run(`CREATE TABLE IF NOT EXISTS pillSchedule (
                 schedule_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 device_id TEXT NOT NULL,
-                pill_id TEXT NOT NULL,
+                pill_id INTEGER NOT NULL,
+                pill_slot INTEGER,
                 dispense_time INTEGER NOT NULL,
                 is_dispensed BOOLEAN DEFAULT 0,
                 dispensed_at DATETIME DEFAULT NULL,
@@ -29,7 +30,8 @@ const db = new sqlite3.Database('./database.db', async (err) => {
         
         db.run(`CREATE TABLE IF NOT EXISTS pillDeviceTokens (
             device_id TEXT PRIMARY KEY,
-            fcm_token TEXT NOT NULL
+            fcm_token TEXT NOT NULL,
+            device_type INTEGER NOT NULL
         )`);
         db.run(`DROP TABLE IF EXISTS pot`, () => {
             db.run(`CREATE TABLE IF NOT EXISTS pot (
