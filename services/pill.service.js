@@ -28,7 +28,6 @@ exports.getDeviceTokens = (req, res) => {
 }
 
 exports.deleteAllPillSchedules = async (req, res) => {
-    // const { pillId } = req.body;
     const deviceId = req.header('X-Device-ID');
     const { pillId } = req.params;
     if(pillId){
@@ -53,14 +52,16 @@ exports.deleteAllPillSchedules = async (req, res) => {
         // } catch (vpsErr) {
         //     console.error("Failed to notify VPS of delete:", vpsErr.message);
         // }
-    }else{
+    }
+    else{
         console.log("no pill id found")
-        db.run(`DELETE FROM pillSchedule`, function (err) {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
-            res.json({ message: 'All pill schedules deleted successfully' });
-        });
+        return res.status(400).json({ error: "No Pill ID found" });
+        // db.run(`DELETE FROM pillSchedule`, function (err) {
+        //     if (err) {
+        //         return res.status(500).json({ error: err.message });
+        //     }
+        //     res.json({ message: 'All pill schedules deleted successfully' });
+        // });
     }
 };
 
