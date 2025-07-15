@@ -75,7 +75,7 @@ exports.addPillSchedule = async (req, res) => {
         return res.status(400).json({ error: "Missing or empty schedules" });
     }
 
-    const payloadToSend = schedules.map(timestamp =>  ({pill_id: timestamp.pill_id, dispense_time: formatTimestamp12Hour(timestamp.dispense_time), pill_slot: entry.pill_slot}));
+    const payloadToSend = schedules.map(timestamp =>  ({pill_id: timestamp.pill_id, dispense_time: formatTimestamp12Hour(timestamp.dispense_time), pill_slot: timestamp.pill_slot}));
 
         console.log("payload to send",payloadToSend)
 
