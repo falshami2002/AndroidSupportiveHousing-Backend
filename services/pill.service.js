@@ -188,7 +188,7 @@ exports.getPillSchedule = (req, res) => {
 
 exports.addPillDispensed = async (req, res) => {
   const { device_id, pill_id, dispense_time } = req.body;
-
+    console.log("dispensed 191",device_id, pill_id, dispense_time)
   if (!pill_id || !dispense_time) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -200,7 +200,7 @@ exports.addPillDispensed = async (req, res) => {
             dispensed_at = CURRENT_TIMESTAMP
         WHERE pill_id = ?;
     `;
-
+    console.log("203")
     db.run(query, [pill_id], function (err) {
         if (err) {
             console.error('Failed to update:', err.message);
@@ -208,12 +208,13 @@ exports.addPillDispensed = async (req, res) => {
         }
 
         if (this.changes === 0) {
+            console.log("211")
             return res.status(404).json({ message: 'No schedule found for given pill_id' });
         }
 
     });
 
-    // console.log(`Pill dispensed: ${pill_id} by device ${deviceId}`);
+    console.log(`Pill dispensed: ${pill_id} by device ${device_id}`);
 
     // Send push notification to the user
     await sendPushNotificationToUser(device_id, pill_id, dispense_time);
@@ -236,7 +237,7 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                 console.warn(`No FCM token found for device ${deviceId}`);
                 console.log("FCM token not found for device" );
             }
-
+            console.log("240")
             const message = {
                 token: row.fcm_token,
                 notification: {
@@ -249,7 +250,7 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                     device_id: String(deviceId),
                 },
             };
-
+            console.log("253")
             // Send push notification
             admin
                 .messaging()
