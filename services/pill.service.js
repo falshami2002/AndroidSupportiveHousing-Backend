@@ -145,6 +145,7 @@ exports.getPillSchedule = (req, res) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
+        console.log("getting all",rows)
 
         const formatted = rows.map(row => ({
             dispense_time: row.dispense_time,
