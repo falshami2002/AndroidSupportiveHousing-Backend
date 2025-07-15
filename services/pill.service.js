@@ -216,8 +216,20 @@ exports.addPillDispensed = async (req, res) => {
 
     console.log(`Pill dispensed: ${pill_id} by device ${device_id}`);
 
+    const message = {
+        token: row.fcm_token,
+        notification: {
+            title: 'Pill Dispensed',
+            body: `Pill was dispensed at ${dispense_time}`,
+        },
+        data: {
+            pill_id: String(pill_id),
+            dispense_time: String(dispense_time),
+            device_id: String(deviceId),
+        },
+    };
     // Send push notification to the user
-    await sendPushNotificationToUser(device_id, pill_id, dispense_time);
+    await sendPushNotificationToUser(device_id, message);
 
     res.status(200).json({ message: 'Pill dispensed recorded successfully' });
   } catch (err) {
@@ -226,7 +238,7 @@ exports.addPillDispensed = async (req, res) => {
   }
 }
 
-async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
+async function sendPushNotificationToUser(deviceId, message) {
     db.get(`SELECT * FROM pillDeviceTokens WHERE device_id = ?`,[deviceId],(err, row) => 
         {
             if (err) {
@@ -238,18 +250,7 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                 console.log("FCM token not found for device" );
             }
             console.log("240")
-            const message = {
-                token: row.fcm_token,
-                notification: {
-                    title: 'Pill Dispensed',
-                    body: `Pill was dispensed at ${dispense_time}`,
-                },
-                data: {
-                    pill_id: String(pill_id),
-                    dispense_time: String(dispense_time),
-                    device_id: String(deviceId),
-                },
-            };
+            
             console.log("253")
             // Send push notification
             admin
@@ -266,3 +267,52 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
         }
     );
 }
+
+// BE: Express endpoint to receive device error
+exports.handleDeviceError = async (req, res) => {
+    const { device_id, error } = req.body;
+  
+    if (!device_id || !error) {
+      return res.status(400).json({ error: 'Missing device_id or error' });
+    }
+  
+    console.log(`Error received from ${device_id}: ${error}`);
+
+    let title = 'Device Error';
+    let body = error;
+
+    switch (error.toLowerCase()) {
+        case 'cup not in place':
+            title = 'Cup Not In Place';
+            body = 'Please place the cup correctly for dispensing.';
+            break;
+        case 'motor stuck':
+            title = 'Motor Stuck';
+            body = 'Dispensing motor is stuck. Manual check required.';
+            break;
+        case 'battery low':
+            title = 'Low Battery';
+            body = 'Device battery is low. Please recharge.';
+            break;
+        default:
+            title = 'Device Alert';
+            body = error;
+            break;
+    }
+
+    const message = {
+        token: row.fcm_token,
+        notification: {
+            title,
+            body
+        },
+        data: {
+            error: String(error),
+            device_id: String(device_id),
+        },
+    };
+    console.log("sending notificATION")
+    await sendPushNotificationToUser(device_id, message);
+
+    res.status(200).json({ message: 'Device error recorded successfully' });
+  };

@@ -9,6 +9,7 @@ router.delete('/schedule/:pillId', pillService.deletePillSchedule)
 router.post('/dispensed',pillService.addPillDispensed)
 router.post('/register-device',pillService.registerDeviceToken)
 router.get('/register-device',pillService.getDeviceTokens)
+router.post('/device-error',pillService.handleDeviceError)
 
 //Post pill event
 // router.post('/pill-history', (req, res) => {
