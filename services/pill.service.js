@@ -46,7 +46,7 @@ exports.deletePillSchedule = async (req, res) => {
         });
         try {
             await axios.post('http://128.199.7.31:3000/api/send-delete', {
-                device_id: deviceId,
+                deviceId,
                 deletes: [pillId]
             });
         } catch (vpsErr) {
