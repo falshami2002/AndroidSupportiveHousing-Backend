@@ -217,7 +217,7 @@ exports.addPillDispensed = async (req, res) => {
     console.log(`Pill dispensed: ${pill_id} by device ${device_id}`);
 
     const message = {
-        token: row.fcm_token,
+        token: "",
         notification: {
             title: 'Pill Dispensed',
             body: `Pill was dispensed at ${dispense_time}`,
@@ -252,6 +252,7 @@ async function sendPushNotificationToUser(deviceId, message) {
             console.log("240")
             
             console.log("253")
+            message.token = row.fcm_token
             // Send push notification
             admin
                 .messaging()
@@ -301,7 +302,7 @@ exports.handleDeviceError = async (req, res) => {
     }
 
     const message = {
-        token: row.fcm_token,
+        token: "",
         notification: {
             title,
             body
