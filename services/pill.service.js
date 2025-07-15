@@ -187,23 +187,36 @@ exports.getPillSchedule = (req, res) => {
 
 
 exports.addPillDispensed = async (req, res) => {
-  const deviceId = req.header('X-Device-ID');
-  const { pill_id, dispense_time, event_type } = req.body;
+  const { device_id, pill_id, dispense_time } = req.body;
 
-  if (!deviceId || !pill_id || !dispense_time) {
+  if (!pill_id || !dispense_time) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    await db.run(`
-      INSERT INTO pillHistory (device_id, pill_id, dispense_time, event_type)
-      VALUES (?, ?, ?, ?)
-    `, [deviceId, pill_id, dispense_time, event_type || 'auto']);
+    const query = `
+        UPDATE pillSchedule
+        SET is_dispensed = 1,
+            dispensed_at = CURRENT_TIMESTAMP
+        WHERE pill_id = ?;
+    `;
 
-    console.log(`Pill dispensed: ${pill_id} by device ${deviceId}`);
+    db.run(query, [pill_id], function (err) {
+        if (err) {
+            console.error('Failed to update:', err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ message: 'No schedule found for given pill_id' });
+        }
+
+    });
+
+    // console.log(`Pill dispensed: ${pill_id} by device ${deviceId}`);
 
     // Send push notification to the user
-    await sendPushNotificationToUser(deviceId, pill_id, dispense_time);
+    await sendPushNotificationToUser(device_id, pill_id, dispense_time);
 
     res.status(200).json({ message: 'Pill dispensed recorded successfully' });
   } catch (err) {
@@ -228,7 +241,7 @@ async function sendPushNotificationToUser(deviceId, pill_id, dispense_time) {
                 token: row.fcm_token,
                 notification: {
                     title: 'Pill Dispensed',
-                    body: `${pill_id} was dispensed at ${dispense_time}`,
+                    body: `Pill was dispensed at ${dispense_time}`,
                 },
                 data: {
                     pill_id: String(pill_id),
