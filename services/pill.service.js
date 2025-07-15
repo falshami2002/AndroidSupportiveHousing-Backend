@@ -136,7 +136,7 @@ exports.getPillSchedule = (req, res) => {
     }
 
     const query = `
-        SELECT dispense_time, pill_id, is_dispensed 
+        SELECT dispense_time, pill_id, is_dispensed, pill_slot 
         FROM pillSchedule 
         WHERE device_id = ?
     `;
