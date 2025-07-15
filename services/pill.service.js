@@ -27,7 +27,7 @@ exports.getDeviceTokens = (req, res) => {
     });
 }
 
-exports.deleteAllPillSchedules = async (req, res) => {
+exports.deletePillSchedule = async (req, res) => {
     const deviceId = req.header('X-Device-ID');
     const { pillId } = req.params;
     if(pillId){
@@ -44,14 +44,14 @@ exports.deleteAllPillSchedules = async (req, res) => {
     
             res.json({ message: "Pill schedule deleted successfully" });
         });
-        // try {
-        //     await axios.post('http://128.199.7.31:3000/api/notify-delete', {
-        //         device_id: deviceId,
-        //         pill_id: pillId  need to send schedule
-        //     });
-        // } catch (vpsErr) {
-        //     console.error("Failed to notify VPS of delete:", vpsErr.message);
-        // }
+        try {
+            await axios.post('http://128.199.7.31:3000/api/send-delete', {
+                device_id: deviceId,
+                deletes: [pillId]
+            });
+        } catch (vpsErr) {
+            console.error("Failed to notify VPS of delete:", vpsErr.message);
+        }
     }
     else{
         console.log("no pill id found")
