@@ -1,8 +1,6 @@
 const db = require('../database/database');
 const admin = require('../firebaseInit');
 const axios = require('axios');
-const { v4: uuidv4 } = require('uuid');
-// const { pendingClients, scheduleQueue } = require('../utils/global');
 
 exports.registerDeviceToken = async (req, res) => {
     const { device_id, fcm_token, device_type } = req.body;
@@ -56,12 +54,6 @@ exports.deletePillSchedule = async (req, res) => {
     else{
         console.log("no pill id found")
         return res.status(400).json({ error: "No Pill ID found" });
-        // db.run(`DELETE FROM pillSchedule`, function (err) {
-        //     if (err) {
-        //         return res.status(500).json({ error: err.message });
-        //     }
-        //     res.json({ message: 'All pill schedules deleted successfully' });
-        // });
     }
 };
 
@@ -158,33 +150,6 @@ exports.getPillSchedule = (req, res) => {
         res.json(formatted);
     });
 }
-
-// exports.sendSchedulesToHardware = (req, res) => {
-//     const deviceId = req.header('X-Device-ID');
-//     if (!deviceId) return res.status(400).json({ error: 'Missing X-Device-ID' });
-
-//     // If there are already schedules pending, send them immediately
-//     if (scheduleQueue[deviceId] && scheduleQueue[deviceId].length > 0) {
-//         const pending = scheduleQueue[deviceId];
-//         scheduleQueue[deviceId] = [];  // clear after sending
-//         return res.json({ schedules: pending });
-//     }
-
-//     // Else: store this client response to notify later
-//     if (!pendingClients[deviceId]) pendingClients[deviceId] = [];
-//     pendingClients[deviceId].push(res);
-
-//     // Timeout after 30s if nothing posted
-//     setTimeout(() => {
-//         const index = pendingClients[deviceId]?.indexOf(res);
-//         if (index !== -1) {
-//             pendingClients[deviceId].splice(index, 1);
-//             res.json({ schedules: [] });  // send empty
-//         }
-//     }, 30000);
-// }
-
-
 
 exports.addPillDispensed = async (req, res) => {
   const { device_id, pill_id, dispense_time } = req.body;
