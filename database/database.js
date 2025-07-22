@@ -6,15 +6,6 @@ const db = new sqlite3.Database('./database.db', async (err) => {
         console.error(err.message);
     } else {
         console.log('Connected to the SQLite database.');
-        // db.run(`CREATE TABLE IF NOT EXISTS pillHistory (
-        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
-        //     device_id TEXT,
-        //     pill_id INTEGER,
-        //     event_type TEXT,
-        //     dispense_time TEXT,
-        //     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        // )`);
-        // db.run(`DROP TABLE IF EXISTS pillDeviceTokens`);
         // db.run(`DROP TABLE IF EXISTS pillSchedule`, () => {
             db.run(`CREATE TABLE IF NOT EXISTS pillSchedule (
                 schedule_id INTEGER PRIMARY KEY AUTOINCREMENT,
