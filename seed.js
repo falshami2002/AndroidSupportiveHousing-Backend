@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database.db');
 
-const recipeData = require('./data/initialRecipeData'); // adjust path accordingly
+const recipeData = require('./initialRecipeData');
 
 function createTables() {
   return new Promise((resolve, reject) => {
