@@ -6,6 +6,6 @@ router.get('/current-recipe', potService.getCurrentRecipe);
 router.put('/current-recipe', potService.putCurrentRecipe);
 router.post('/current-recipe', potService.postCurrentRecipe);
 router.delete('/current-recipe', potService.deleteCurrentRecipe);
-router.get('/recipe/:id',potService.getRecipeById);
+router.get('/recipe',potService.getRecipe);
 
 module.exports = router;

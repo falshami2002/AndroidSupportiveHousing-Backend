@@ -1,56 +1,63 @@
 const db = require('../database/database');
 
 // get recipe by id
-exports.getRecipeById = (req, res) => {
-    const recipeId = req.params.id;
+exports.getRecipe = (req, res) => {
   
     try {
-      // Fetch recipe
-      db.get(`SELECT * FROM recipes WHERE id = ?`, [recipeId], (err, recipe) => {
-        if (err || !recipe) return res.status(404).json({ error: "Recipe not found" });
-  
-        // Fetch ingredients
-        db.all(
-          `SELECT serving_size, name, quantity FROM ingredients WHERE recipe_id = ?`,
-          [recipeId],
-          (err, ingredientsRows) => {
+        db.all(`SELECT * FROM recipes`, async (err, recipes) => {
             if (err) return res.status(500).json({ error: err.message });
-  
-            // Group ingredients by serving size
-            const ingredientsByServing = {};
-            for (const row of ingredientsRows) {
-              if (!ingredientsByServing[row.serving_size]) {
-                ingredientsByServing[row.serving_size] = [];
-              }
-              ingredientsByServing[row.serving_size].push({
-                name: row.name,
-                quantity: row.quantity,
+        
+            const recipeResponses = [];
+        
+            for (const recipe of recipes) {
+              const ingredientsRows = await new Promise((resolve, reject) => {
+                db.all(
+                  `SELECT serving_size, name, quantity FROM ingredients WHERE recipe_id = ?`,
+                  [recipe.id],
+                  (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows);
+                  }
+                );
               });
-            }
-  
-            // Fetch steps
-            db.all(
-              `SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_order`,
-              [recipeId],
-              (err, stepsRows) => {
-                if (err) return res.status(500).json({ error: err.message });
-  
-                // Extract distinct serving sizes
-                const servings = [...new Set(ingredientsRows.map(row => row.serving_size))].sort();
-  
-                res.json({
-                  id: recipe.id,
-                  name: recipe.name,
-                  estimated_time: recipe.estimated_time,
-                  servings,
-                  ingredientsByServing,
-                  steps: stepsRows,
+        
+              // Group ingredients by serving size
+              const ingredientsByServing = {};
+              for (const row of ingredientsRows) {
+                if (!ingredientsByServing[row.serving_size]) {
+                  ingredientsByServing[row.serving_size] = [];
+                }
+                ingredientsByServing[row.serving_size].push({
+                  name: row.name,
+                  quantity: row.quantity,
                 });
               }
-            );
-          }
-        );
-      });
+        
+              const stepsRows = await new Promise((resolve, reject) => {
+                db.all(
+                  `SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_order`,
+                  [recipe.id],
+                  (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows);
+                  }
+                );
+              });
+        
+              const servings = [...new Set(ingredientsRows.map(r => r.serving_size))].sort();
+        
+              recipeResponses.push({
+                id: recipe.id,
+                name: recipe.name,
+                estimated_time: recipe.estimated_time,
+                servings,
+                ingredientsByServing,
+                steps: stepsRows
+              });
+            }
+        
+            res.json(recipeResponses);
+        });
     } catch (e) {
       res.status(500).json({ error: 'Unexpected server error' });
     }
