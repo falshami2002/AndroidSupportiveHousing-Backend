@@ -2,7 +2,13 @@ const db = require('../database/database');
 
 //Post current recipe
 exports.postCurrentRecipe =  (req, res) => {
-    const steps = ["Turn on the medium heat and put an empty pot on the stove", "Heat the pot for 2 minutes then add in oil", "Once the oil is hot (about 2 minutes after adding it to pot), carefully add in your main ingredient", "Keep stirring the pot every 4 minutes until the food is cooked", "Once the food is cooked, add in all your ingredients", "The food is ready to be served. Once the consistency is to your liking, serve the food in a plate, and remember to turn off the stove."]
+    const steps = ["Turn on the medium heat and put an empty pot on the stove", 
+    "Heat the pot for 2 minutes then add in oil", 
+    "Once the oil is hot (about 2 minutes after adding it to pot), carefully add in your main ingredient", 
+    "Keep stirring the pot every 4 minutes until the food is cooked", 
+    "Once the food is cooked, add in all your ingredients", 
+    "The food is ready to be served. Once the consistency is to your liking, serve the food in a plate, and remember to turn off the stove."]
+    
     const {message} = req.body;
 
     const recipe_id = 1;
