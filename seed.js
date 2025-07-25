@@ -3,75 +3,80 @@ const db = new sqlite3.Database('./database.db');
 
 const recipeData = require('./initialRecipeData');
 
-function createTables() {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-        console.log('Connected to the SQLite database.');
-        db.run(`DROP TABLE IF EXISTS pillSchedule`, () => {
-            db.run(`CREATE TABLE IF NOT EXISTS pillSchedule (
-                schedule_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                device_id TEXT NOT NULL,
-                pill_id INTEGER NOT NULL,
-                pill_slot INTEGER,
-                dispense_time INTEGER NOT NULL,
-                is_dispensed BOOLEAN DEFAULT 0,
-                dispensed_at DATETIME DEFAULT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )`);
-        });
-        db.run(`DROP TABLE IF EXISTS pillDeviceTokens`, () => {
-            db.run(`CREATE TABLE IF NOT EXISTS pillDeviceTokens (
-                device_id TEXT PRIMARY KEY,
-                fcm_token TEXT NOT NULL,
-                device_type INTEGER NOT NULL
-            )`);
-        });
-        db.run(`DROP TABLE IF EXISTS pot`, () => {
-            db.run(`CREATE TABLE IF NOT EXISTS pot (
-                recipe_id INTEGER PRIMARY KEY,
-                current_step INTEGER
-            )`);
-        });
-        db.run(`DROP TABLE IF EXISTS recipes`, () => {
-            db.run(`CREATE TABLE IF NOT EXISTS recipes (
-                id INTEGER PRIMARY KEY,
-                name TEXT,
-                estimated_time INTEGER
-            )`);
-        });
-        db.run(`DROP TABLE IF EXISTS steps`, () => {
-            db.run(`CREATE TABLE IF NOT EXISTS steps (
-                id INTEGER PRIMARY KEY,
-                recipe_id INTEGER,
-                step_order INTEGER,
-                name TEXT,
-                duration INTEGER,
-                instructions TEXT,
-                input TEXT,
-                output TEXT,
-                FOREIGN KEY (recipe_id) REFERENCES recipes(id)
-            )`);
-        });
-        db.run(`DROP TABLE IF EXISTS ingredients`, () => {
-            db.run(`CREATE TABLE IF NOT EXISTS ingredients (
-                id INTEGER PRIMARY KEY,
-                recipe_id INTEGER,
-                serving_size INTEGER,
-                name TEXT,
-                quantity TEXT,
-                FOREIGN KEY (recipe_id) REFERENCES recipes(id)
-            )`);
-        });
-        db.run(`CREATE TABLE IF NOT EXISTS motion (
+function runQuery(sql) {
+    return new Promise((resolve, reject) => {
+      db.run(sql, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+}
+
+async function createTables() {
+    try {
+        await runQuery(`DROP TABLE IF EXISTS pillSchedule`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS pillSchedule (
+            schedule_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id TEXT NOT NULL,
+            pill_id INTEGER NOT NULL,
+            pill_slot INTEGER,
+            dispense_time INTEGER NOT NULL,
+            is_dispensed BOOLEAN DEFAULT 0,
+            dispensed_at DATETIME DEFAULT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await runQuery(`DROP TABLE IF EXISTS pillDeviceTokens`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS pillDeviceTokens (
+            device_id TEXT PRIMARY KEY,
+            fcm_token TEXT NOT NULL,
+            device_type INTEGER NOT NULL
+        )`);
+
+        await runQuery(`DROP TABLE IF EXISTS pot`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS pot (
+            recipe_id INTEGER PRIMARY KEY,
+            current_step INTEGER
+        )`);
+        await runQuery(`DROP TABLE IF EXISTS recipes`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS recipes (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            estimated_time INTEGER
+        )`);
+        await runQuery(`DROP TABLE IF EXISTS steps`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS steps (
+            id INTEGER PRIMARY KEY,
+            recipe_id INTEGER,
+            step_order INTEGER,
+            name TEXT,
+            duration INTEGER,
+            instructions TEXT,
+            input TEXT,
+            output TEXT,
+            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+        )`);
+        await runQuery(`DROP TABLE IF EXISTS ingredients`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS ingredients (
+            id INTEGER PRIMARY KEY,
+            recipe_id INTEGER,
+            serving_size INTEGER,
+            name TEXT,
+            quantity TEXT,
+            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+        )`);
+
+        await runQuery(`DROP TABLE IF EXISTS motion`);
+        await runQuery(`CREATE TABLE IF NOT EXISTS motion (
             room_id INTEGER,
             event_type TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`, (createErr) => {
-            if (createErr) return reject(createErr);
-            resolve();
-          });
-    });
-  });
+        )`);
+        
+        console.log('Recipes table created.');
+    } catch (err) {
+        console.error('Error creating tables:', err);
+        throw err;
+    }
 }
 
 function insertRecipe(recipe) {
