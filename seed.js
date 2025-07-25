@@ -66,7 +66,10 @@ function createTables() {
             room_id INTEGER,
             event_type TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
+        )`, (createErr) => {
+            if (createErr) return reject(createErr);
+            resolve();
+          });
     });
   });
 }
@@ -148,6 +151,4 @@ async function seed() {
   }
 }
 
-(async () => {
-    await seed();
-})();
+seed();
