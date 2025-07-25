@@ -45,7 +45,7 @@ async function createTables() {
         )`);
         await runQuery(`DROP TABLE IF EXISTS steps`);
         await runQuery(`CREATE TABLE IF NOT EXISTS steps (
-            id INTEGER PRIMARY KEY,
+            id INTEGER,
             recipe_id INTEGER,
             step_order INTEGER,
             name TEXT,
