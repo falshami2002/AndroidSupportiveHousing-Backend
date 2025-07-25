@@ -1,6 +1,6 @@
 const db = require('../database/database');
 
-// get recipe by id
+// get recipes
 exports.getRecipe = (req, res) => {
   
     try {
