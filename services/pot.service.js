@@ -62,7 +62,7 @@ exports.getRecipe = (req, res) => {
                 servings,
                 ingredientsByServing,
                 steps: stepsRows,
-                instructions: instructionsRows
+                instructions: instructionsRows.map(row => row.text)
               });
             }
         
