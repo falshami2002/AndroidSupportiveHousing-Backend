@@ -136,6 +136,19 @@ function insertStep(step) {
   });
 }
 
+function insertInstruction(recipeId, stepOrder, text) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO instructions (recipe_id, step_order, text) VALUES (?, ?, ?)`,
+        [recipeId, stepOrder, text],
+        function (err) {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
+    });
+}
+
 async function seed() {
   try {
     console.log('Creating tables...');
@@ -152,6 +165,9 @@ async function seed() {
       console.log("After adding ingredtients")
       for (const step of recipe.steps || []) {
         await insertStep(step);
+      }
+      for (const [index, instructionText] of (recipe.instructions || []).entries()) {
+        await insertInstruction(recipe.id, index + 1, instructionText);
       }
       console.log("after adding steps")
     }
