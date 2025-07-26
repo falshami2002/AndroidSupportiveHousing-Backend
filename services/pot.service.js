@@ -46,13 +46,23 @@ exports.getRecipe = (req, res) => {
         
               const servings = [...new Set(ingredientsRows.map(r => r.serving_size))].sort();
         
+              // Fetch instructions
+              const instructionsRows = await new Promise((resolve, reject) => {
+                db.all(
+                `SELECT step_order, text FROM instructions WHERE recipe_id = ? ORDER BY step_order`,
+                [recipe.id],
+                (err, rows) => (err ? reject(err) : resolve(rows))
+                );
+              });
+
               recipeResponses.push({
                 id: recipe.id,
                 name: recipe.name,
                 estimated_time: recipe.estimated_time,
                 servings,
                 ingredientsByServing,
-                steps: stepsRows
+                steps: stepsRows,
+                instructions: instructionsRows
               });
             }
         

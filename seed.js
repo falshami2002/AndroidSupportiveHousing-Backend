@@ -57,12 +57,20 @@ async function createTables() {
         )`);
         await runQuery(`DROP TABLE IF EXISTS ingredients`);
         await runQuery(`CREATE TABLE IF NOT EXISTS ingredients (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER,
             serving_size INTEGER,
             name TEXT,
             quantity TEXT,
             FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+        )`);
+        await runQuery(`DROP TABLE IF EXISTS instructions`);
+        await runQuery(`CREATE TABLE instructions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipe_id INTEGER,
+            step_order INTEGER,
+            text TEXT,
+            FOREIGN KEY(recipe_id) REFERENCES recipes(id)
         )`);
 
         await runQuery(`DROP TABLE IF EXISTS motion`);
