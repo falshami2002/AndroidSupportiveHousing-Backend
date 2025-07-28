@@ -58,6 +58,7 @@ exports.deletePillSchedule = async (req, res) => {
 };
 
 exports.addPillSchedule = async (req, res) => {
+    console.log("adding schedule")
     const deviceId = req.header('X-Device-ID');  
     const { schedules } = req.body;
     console.log("params",deviceId,schedules)
