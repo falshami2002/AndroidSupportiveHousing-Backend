@@ -153,6 +153,7 @@ exports.getPillSchedule = (req, res) => {
 }
 
 exports.addPillDispensed = async (req, res) => {
+    console.log("dispensed 191")
   const { device_id, pill_id, dispense_time } = req.body;
     console.log("dispensed 191",device_id, pill_id, dispense_time)
   if (!pill_id || !dispense_time) {

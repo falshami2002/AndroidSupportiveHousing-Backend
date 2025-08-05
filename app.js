@@ -15,7 +15,7 @@ const PORT = 3000;
 
 // Middleware
 app.use(bodyParser.json());
-
+console.log("ok tutor")
 const pillRoutes = require('./routes/pill.routes');
 app.use('/api/pill', pillRoutes);
 
