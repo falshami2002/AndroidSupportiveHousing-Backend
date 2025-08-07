@@ -3,6 +3,7 @@ const admin = require('../firebaseInit');
 const axios = require('axios');
 
 exports.registerDeviceToken = async (req, res) => {
+    console.log("registering",req.body)
     const { device_id, fcm_token, device_type } = req.body;
     if (device_id == null || !fcm_token || !device_type) {
         return res.status(400).json({ error: 'Missing required fields' });
