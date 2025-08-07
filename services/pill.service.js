@@ -192,7 +192,7 @@ exports.addPillDispensed = async (req, res) => {
         data: {
             pill_id: String(pill_id),
             dispense_time: String(dispense_time),
-            device_id: String(deviceId),
+            device_id: String(device_id),
         },
     };
     // Send push notification to the user
