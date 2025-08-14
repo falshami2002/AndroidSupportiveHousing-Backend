@@ -91,7 +91,7 @@ app.get('/api/wait-for-schedule', (req, res) => {
         pendingCombinedResponses[deviceId].res.status(204).end(); // No Content
         delete pendingCombinedResponses[deviceId];
       }
-    }, 30000);
+    }, 5000);
 
     pendingCombinedResponses[deviceId] = { res, timeout };
   }

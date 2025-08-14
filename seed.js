@@ -132,20 +132,16 @@ async function seed() {
   try {
     console.log('Creating tables...');
     await createTables();
-    console.log("after creating tables",recipeData)
     for (const recipe of recipeData) {
       await insertRecipe(recipe);
-        console.log("after insert recipe")
       for (const [servingSize, ingredients] of Object.entries(recipe.ingredientsByServing)) {
         for (const ingredient of ingredients) {
           await insertIngredient(recipe.id, parseInt(servingSize), ingredient);
         }
       }
-      console.log("After adding ingredtients")
       for (const step of recipe.steps || []) {
         await insertStep(step);
       }
-      console.log("after adding steps")
     }
 
     console.log('Database seeded successfully!');
