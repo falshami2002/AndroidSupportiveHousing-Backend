@@ -37,33 +37,6 @@ async function createTables() {
             recipe_id INTEGER PRIMARY KEY,
             current_step INTEGER
         )`);
-        await runQuery(`DROP TABLE IF EXISTS recipes`);
-        await runQuery(`CREATE TABLE IF NOT EXISTS recipes (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            estimated_time INTEGER
-        )`);
-        await runQuery(`DROP TABLE IF EXISTS steps`);
-        await runQuery(`CREATE TABLE IF NOT EXISTS steps (
-            id INTEGER,
-            recipe_id INTEGER,
-            step_order INTEGER,
-            name TEXT,
-            duration INTEGER,
-            instructions TEXT,
-            input TEXT,
-            output TEXT,
-            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
-        )`);
-        await runQuery(`DROP TABLE IF EXISTS ingredients`);
-        await runQuery(`CREATE TABLE IF NOT EXISTS ingredients (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            recipe_id INTEGER,
-            serving_size INTEGER,
-            name TEXT,
-            quantity TEXT,
-            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
-        )`);
 
         await runQuery(`DROP TABLE IF EXISTS motion`);
         await runQuery(`CREATE TABLE IF NOT EXISTS motion (
@@ -79,71 +52,10 @@ async function createTables() {
     }
 }
 
-function insertRecipe(recipe) {
-  return new Promise((resolve, reject) => {
-    db.run(
-      `INSERT INTO recipes (id, name, estimated_time) VALUES (?, ?, ?)`,
-      [recipe.id, recipe.name, recipe.estimated_time],
-      function (err) {
-        if (err) return reject(err);
-        resolve();
-      }
-    );
-  });
-}
-
-function insertIngredient(recipeId, servingSize, ingredient) {
-  return new Promise((resolve, reject) => {
-    db.run(
-      `INSERT INTO ingredients (recipe_id, serving_size, name, quantity) VALUES (?, ?, ?, ?)`,
-      [recipeId, servingSize, ingredient.name, ingredient.quantity],
-      function (err) {
-        if (err) return reject(err);
-        resolve();
-      }
-    );
-  });
-}
-
-function insertStep(step) {
-  return new Promise((resolve, reject) => {
-    db.run(
-      `INSERT INTO steps (id, recipe_id, step_order, name, duration, instructions, input, output)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        step.id,
-        step.recipe_id,
-        step.step_order,
-        step.name,
-        step.duration,
-        step.instructions,
-        step.input,
-        step.output,
-      ],
-      function (err) {
-        if (err) return reject(err);
-        resolve();
-      }
-    );
-  });
-}
-
 async function seed() {
   try {
     console.log('Creating tables...');
     await createTables();
-    for (const recipe of recipeData) {
-      await insertRecipe(recipe);
-      for (const [servingSize, ingredients] of Object.entries(recipe.ingredientsByServing)) {
-        for (const ingredient of ingredients) {
-          await insertIngredient(recipe.id, parseInt(servingSize), ingredient);
-        }
-      }
-      for (const step of recipe.steps || []) {
-        await insertStep(step);
-      }
-    }
-
     console.log('Database seeded successfully!');
   } catch (err) {
     console.error('Error seeding database:', err);

@@ -1,81 +1,20 @@
 const db = require('../database/database');
+const recipeData = require('../initialRecipeData');
 
 // get recipes
 exports.getRecipe = (req, res) => {
-  
-    try {
-        db.all(`SELECT * FROM recipes`, async (err, recipes) => {
-            if (err) return res.status(500).json({ error: err.message });
-        
-            const recipeResponses = [];
-        
-            for (const recipe of recipes) {
-              const ingredientsRows = await new Promise((resolve, reject) => {
-                db.all(
-                  `SELECT serving_size, name, quantity FROM ingredients WHERE recipe_id = ?`,
-                  [recipe.id],
-                  (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                  }
-                );
-              });
-        
-              // Group ingredients by serving size
-              const ingredientsByServing = {};
-              for (const row of ingredientsRows) {
-                if (!ingredientsByServing[row.serving_size]) {
-                  ingredientsByServing[row.serving_size] = [];
-                }
-                ingredientsByServing[row.serving_size].push({
-                  name: row.name,
-                  quantity: row.quantity,
-                });
-              }
-        
-              const stepsRows = await new Promise((resolve, reject) => {
-                db.all(
-                  `SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_order`,
-                  [recipe.id],
-                  (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                  }
-                );
-              });
-        
-              const servings = [...new Set(ingredientsRows.map(r => r.serving_size))].sort();
-
-              recipeResponses.push({
-                id: recipe.id,
-                name: recipe.name,
-                estimated_time: recipe.estimated_time,
-                servings,
-                ingredientsByServing,
-                steps: stepsRows
-              });
-            }
-        
-            res.json(recipeResponses);
-        });
-    } catch (e) {
-      res.status(500).json({ error: 'Unexpected server error' });
-    }
+  const recipeResponses = recipeData      
+  res.json(recipeResponses);
 };
-
 
 //Post current recipe
 exports.postCurrentRecipe =  (req, res) => {
-    const steps = ["Turn on the medium heat and put an empty pot on the stove", 
-    "Heat the pot for 2 minutes then add in oil", 
-    "Once the oil is hot (about 2 minutes after adding it to pot), carefully add in your main ingredient", 
-    "Keep stirring the pot every 4 minutes until the food is cooked", 
-    "Once the food is cooked, add in all your ingredients", 
-    "The food is ready to be served. Once the consistency is to your liking, serve the food in a plate, and remember to turn off the stove."]
-    
+
+    const steps = recipeData[0].steps.map(step => step.instructions); //replace 0 with curr recipe id
+
     const {message} = req.body;
 
-    const recipe_id = 1;
+    const recipe_id = 1; //update selected recipe when we add more recipes
     const step_order = steps.indexOf(message) + 1;
 
     db.run(`DELETE FROM pot`, (err) => {
