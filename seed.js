@@ -1,10 +1,9 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-// Create a connection pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false } // required for Render
+  ssl: { rejectUnauthorized: false }
 });
 
 async function runQuery(sql) {
@@ -24,7 +23,7 @@ async function createTables() {
       device_id TEXT NOT NULL,
       pill_id INTEGER NOT NULL,
       pill_slot INTEGER,
-      dispense_time INTEGER NOT NULL,
+      dispense_time TIMESTAMP NOT NULL,
       is_dispensed BOOLEAN DEFAULT FALSE,
       dispensed_at TIMESTAMP DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -65,7 +64,7 @@ async function seed() {
   } catch (err) {
     console.error('Error seeding database:', err);
   } finally {
-    await pool.end(); // close connection
+    await pool.end();
   }
 }
 
