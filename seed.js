@@ -1,55 +1,60 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./database.db');
+require('dotenv').config();
+const { Pool } = require('pg');
 
-const recipeData = require('./initialRecipeData');
+// Create a connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // required for Render
+});
 
-function runQuery(sql) {
-    return new Promise((resolve, reject) => {
-      db.run(sql, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+async function runQuery(sql) {
+  try {
+    await pool.query(sql);
+  } catch (err) {
+    console.error('Query error:', err);
+    throw err;
+  }
 }
 
 async function createTables() {
-    try {
-        await runQuery(`DROP TABLE IF EXISTS pillSchedule`);
-        await runQuery(`CREATE TABLE IF NOT EXISTS pillSchedule (
-            schedule_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            device_id TEXT NOT NULL,
-            pill_id INTEGER NOT NULL,
-            pill_slot INTEGER,
-            dispense_time INTEGER NOT NULL,
-            is_dispensed BOOLEAN DEFAULT 0,
-            dispensed_at DATETIME DEFAULT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        await runQuery(`DROP TABLE IF EXISTS pillDeviceTokens`);
-        await runQuery(`CREATE TABLE IF NOT EXISTS pillDeviceTokens (
-            device_id TEXT PRIMARY KEY,
-            fcm_token TEXT NOT NULL,
-            device_type INTEGER NOT NULL
-        )`);
+  try {
+    await runQuery(`DROP TABLE IF EXISTS pillSchedule`);
+    await runQuery(`CREATE TABLE IF NOT EXISTS pillSchedule (
+      schedule_id SERIAL PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      pill_id INTEGER NOT NULL,
+      pill_slot INTEGER,
+      dispense_time INTEGER NOT NULL,
+      is_dispensed BOOLEAN DEFAULT FALSE,
+      dispensed_at TIMESTAMP DEFAULT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
 
-        await runQuery(`DROP TABLE IF EXISTS pot`);
-        await runQuery(`CREATE TABLE IF NOT EXISTS pot (
-            recipe_id INTEGER PRIMARY KEY,
-            current_step INTEGER
-        )`);
+    await runQuery(`DROP TABLE IF EXISTS pillDeviceTokens`);
+    await runQuery(`CREATE TABLE IF NOT EXISTS pillDeviceTokens (
+      device_id TEXT PRIMARY KEY,
+      fcm_token TEXT NOT NULL,
+      device_type INTEGER NOT NULL
+    )`);
 
-        await runQuery(`DROP TABLE IF EXISTS motion`);
-        await runQuery(`CREATE TABLE IF NOT EXISTS motion (
-            room_id INTEGER,
-            event_type TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        console.log('Recipes table created.');
-    } catch (err) {
-        console.error('Error creating tables:', err);
-        throw err;
-    }
+    await runQuery(`DROP TABLE IF EXISTS pot`);
+    await runQuery(`CREATE TABLE IF NOT EXISTS pot (
+      recipe_id INTEGER PRIMARY KEY,
+      current_step INTEGER
+    )`);
+
+    await runQuery(`DROP TABLE IF EXISTS motion`);
+    await runQuery(`CREATE TABLE IF NOT EXISTS motion (
+      room_id INTEGER,
+      event_type TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    console.log('Tables created.');
+  } catch (err) {
+    console.error('Error creating tables:', err);
+    throw err;
+  }
 }
 
 async function seed() {
@@ -60,7 +65,7 @@ async function seed() {
   } catch (err) {
     console.error('Error seeding database:', err);
   } finally {
-    db.close();
+    await pool.end(); // close connection
   }
 }
 

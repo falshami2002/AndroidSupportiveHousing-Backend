@@ -23,92 +23,92 @@ const potRoutes = require('./routes/pot.routes');
 app.use('/api/pot',potRoutes)
 
 //Delete all recipes
-app.delete('/recipe', (req, res) => {
-    db.run(`DELETE FROM recipes`, function(err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        } else {
-            res.status(200).json({result: "all entries deleted"});
-        }
-    });
-});
+// app.delete('/recipe', (req, res) => {
+//     db.run(`DELETE FROM recipes`, function(err) {
+//         if (err) {
+//             res.status(400).json({ error: err.message });
+//         } else {
+//             res.status(200).json({result: "all entries deleted"});
+//         }
+//     });
+// });
 
-//post step
-app.post('/step', (req, res) => {
-    const {recipe_id, step_order, name, duration, instructions, input, output} = req.body;
-    db.all(`INSERT INTO steps (recipe_id, step_order, name, duration, instructions, input, output) VALUES (?, ?, ?, ?, ?, ?, ?)`, [recipe_id, step_order, name, duration, instructions, input, output], (err, values) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.status(200).json({
-                recipe_id: recipe_id,
-                step_order: step_order,
-                name: name,
-                duration: duration,
-                instructions: instructions,
-                input: input,
-                output: output
-            });
-        }
-    });
-});
+// //post step
+// app.post('/step', (req, res) => {
+//     const {recipe_id, step_order, name, duration, instructions, input, output} = req.body;
+//     db.all(`INSERT INTO steps (recipe_id, step_order, name, duration, instructions, input, output) VALUES (?, ?, ?, ?, ?, ?, ?)`, [recipe_id, step_order, name, duration, instructions, input, output], (err, values) => {
+//         if (err) {
+//             res.status(500).json({ error: err.message });
+//         } else {
+//             res.status(200).json({
+//                 recipe_id: recipe_id,
+//                 step_order: step_order,
+//                 name: name,
+//                 duration: duration,
+//                 instructions: instructions,
+//                 input: input,
+//                 output: output
+//             });
+//         }
+//     });
+// });
 
-//Get steps
-app.get('/step', (req, res) => {
-    const {recipe_id, step_order} = req.query;
-    db.all(`SELECT * FROM steps WHERE recipe_id = ? AND step_order = ?`, [recipe_id, step_order], (err, values) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.status(200).json(values);
-        }
-    });
-});
+// //Get steps
+// app.get('/step', (req, res) => {
+//     const {recipe_id, step_order} = req.query;
+//     db.all(`SELECT * FROM steps WHERE recipe_id = ? AND step_order = ?`, [recipe_id, step_order], (err, values) => {
+//         if (err) {
+//             res.status(500).json({ error: err.message });
+//         } else {
+//             res.status(200).json(values);
+//         }
+//     });
+// });
 
-//Get recipe
-app.get('/recipe', (req, res) => {
-    const {id} = req.query;
-    db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        } else if (!recipeResults || recipeResults.length === 0) {
-            return res.status(404).json({ error: 'Recipe not found' });
-        }
+// //Get recipe
+// app.get('/recipe', (req, res) => {
+//     const {id} = req.query;
+//     db.all(`SELECT * FROM recipes WHERE id = ?`, [id], (err, recipeResults) => {
+//         if (err) {
+//             return res.status(500).json({ error: err.message });
+//         } else if (!recipeResults || recipeResults.length === 0) {
+//             return res.status(404).json({ error: 'Recipe not found' });
+//         }
 
-        const recipe = recipeResults[0];
+//         const recipe = recipeResults[0];
 
-        db.all(`SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_order ASC`, [id], (err, stepResults) => {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
+//         db.all(`SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_order ASC`, [id], (err, stepResults) => {
+//             if (err) {
+//                 return res.status(500).json({ error: err.message });
+//             }
 
-            return res.status(200).json({
-                id: recipe.id,
-                name: recipe.name,
-                estimated_time: recipe.estimated_time,
-                ingredients: JSON.parse(recipe.ingredients),
-                steps: stepResults
-            });
-        });
-    });
-});
+//             return res.status(200).json({
+//                 id: recipe.id,
+//                 name: recipe.name,
+//                 estimated_time: recipe.estimated_time,
+//                 ingredients: JSON.parse(recipe.ingredients),
+//                 steps: stepResults
+//             });
+//         });
+//     });
+// });
 
-//post recipe
-app.post('/recipe', (req, res) => {
-    const {id, name, estimated_time, ingredients} = req.body;
-    db.run(`INSERT INTO recipes (id, name, estimated_time, ingredients) VALUES (?, ?, ?, ?)`, [id, name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.status(200).json({
-                id: id,
-                name: name,
-                estimated_time: estimated_time,
-                ingredients: ingredients
-            });
-        }
-    });
-});
+// //post recipe
+// app.post('/recipe', (req, res) => {
+//     const {id, name, estimated_time, ingredients} = req.body;
+//     db.run(`INSERT INTO recipes (id, name, estimated_time, ingredients) VALUES (?, ?, ?, ?)`, [id, name, estimated_time, JSON.stringify(ingredients)], (err, values) => {
+//         if (err) {
+//             res.status(500).json({ error: err.message });
+//         } else {
+//             res.status(200).json({
+//                 id: id,
+//                 name: name,
+//                 estimated_time: estimated_time,
+//                 ingredients: ingredients
+//             });
+//         }
+//     });
+// });
 
 // //Delete current recipe
 // app.delete('/current-recipe', (req, res) => {
@@ -183,41 +183,41 @@ app.post('/recipe', (req, res) => {
 // });
 
 
+// ---------MOTION APIS (TO BE UPDATED)----------------------------------------------------------------------------------------//
+// //Post motion event
+// app.post('/motion', (req, res) => {
+//     const { room_id, event_type } = req.body;
+//     db.run(`INSERT INTO motion (room_id, event_type) VALUES (?, ?)`, [room_id, event_type], function(err) {
+//         if (err) {
+//             res.status(400).json({ error: err.message });
+//         } else {
+//             const now = new Date().toISOString()
+//             res.json({ room_id: room_id, event_type: event_type, created_at: now });
+//         }
+//     });
+// });
 
-//Post motion event
-app.post('/motion', (req, res) => {
-    const { room_id, event_type } = req.body;
-    db.run(`INSERT INTO motion (room_id, event_type) VALUES (?, ?)`, [room_id, event_type], function(err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-        } else {
-            const now = new Date().toISOString()
-            res.json({ room_id: room_id, event_type: event_type, created_at: now });
-        }
-    });
-});
+// //Get all motion events
+// app.get('/motion', (req, res) => {
+//     db.all(`SELECT * FROM motion`, (err, values) => {
+//         if (err) {
+//             res.status(500).json({ error: err.message });
+//         } else {
+//             res.json(values);
+//         }
+//     });
+// });
 
-//Get all motion events
-app.get('/motion', (req, res) => {
-    db.all(`SELECT * FROM motion`, (err, values) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(values);
-        }
-    });
-});
-
-//Delete all for testing
-app.delete('/motion-RESET', (req, res) => {
-    db.run("DELETE FROM motion", (err) => { 
-        if (err) {
-            res.status(500).json({ error: err.message }); 
-        } else {
-            res.status(200).json({ message: 'Deleted successfully.' }); 
-        }
-    });
-});
+// //Delete all for testing
+// app.delete('/motion-RESET', (req, res) => {
+//     db.run("DELETE FROM motion", (err) => { 
+//         if (err) {
+//             res.status(500).json({ error: err.message }); 
+//         } else {
+//             res.status(200).json({ message: 'Deleted successfully.' }); 
+//         }
+//     });
+// });
 
 /*app.get('/users/:id', (req, res) => {
     db.get(`SELECT * FROM users WHERE id = ?`, [req.params.id], (err, row) => {

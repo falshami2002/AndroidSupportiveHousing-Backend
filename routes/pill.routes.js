@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const pillService = require('../services/pill.service');
-const db = require('../database/database');
 
 router.post('/schedule', pillService.addPillSchedule); //fe to be
 router.get('/schedule', pillService.getPillSchedule); //fe to be
