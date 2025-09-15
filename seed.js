@@ -23,7 +23,7 @@ async function createTables() {
       device_id TEXT NOT NULL,
       pill_id INTEGER NOT NULL,
       pill_slot INTEGER,
-      dispense_time TIMESTAMP NOT NULL,
+      dispense_time BIGINT NOT NULL,
       is_dispensed BOOLEAN DEFAULT FALSE,
       dispensed_at TIMESTAMP DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

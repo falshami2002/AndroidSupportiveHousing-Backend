@@ -92,6 +92,7 @@ exports.addPillSchedule = async (req, res) => {
       deviceId,
       schedules: payloadToSend
     });
+    console.log("sent to vps")
   } catch (err) {
     console.error("Failed to send to VPS:", err.message);
   }
@@ -127,7 +128,7 @@ exports.getPillSchedule = async (req, res) => {
 
     const formatted = result.rows
       .map(row => ({
-        dispense_time: row.dispense_time,
+        dispense_time: new Date(Number(row.dispense_time)),
         pill_id: row.pill_id,
         is_dispensed: row.is_dispensed,
         pill_slot: row.pill_slot
