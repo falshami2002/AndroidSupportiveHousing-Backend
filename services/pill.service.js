@@ -101,7 +101,7 @@ exports.addPillSchedule = async (req, res) => {
     const insertPromises = schedules.map(entry =>
       pool.query(
         `INSERT INTO pillSchedule (device_id, pill_id, dispense_time, pill_slot) VALUES ($1, $2, $3, $4)`,
-        [deviceId, Number(entry.pill_id), Number(entry.dispense_time), Number(entry.pill_slot)]
+        [deviceId, Number(entry.pill_id), entry.dispense_time, Number(entry.pill_slot)]
       )
     );
 
@@ -128,7 +128,7 @@ exports.getPillSchedule = async (req, res) => {
 
     const formatted = result.rows
       .map(row => ({
-        dispense_time: new Date(Number(row.dispense_time)),
+        dispense_time: row.dispense_time,
         pill_id: row.pill_id,
         is_dispensed: row.is_dispensed,
         pill_slot: row.pill_slot
