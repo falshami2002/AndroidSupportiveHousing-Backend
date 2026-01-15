@@ -70,8 +70,11 @@ exports.addPillSchedule = async (req, res) => {
         return res.status(400).json({ error: "Missing or empty schedules" });
     }
 
-    const payloadToSend = schedules.map(timestamp =>  ({pill_id: timestamp.pill_id, dispense_time: formatTimestamp12Hour(timestamp.dispense_time), pill_slot: timestamp.pill_slot}));
-
+    const payloadToSend = schedules.map(entry => ({
+        pill_id: entry.pill_id,
+        dispense_time: Math.floor(entry.dispense_time / 1000), // epoch seconds
+        pill_slot: entry.pill_slot
+    }));
         console.log("payload to send",payloadToSend)
 
     // Forward to VPS proxy
@@ -108,22 +111,7 @@ exports.addPillSchedule = async (req, res) => {
         });
     });
 };
-function formatTimestamp12Hour(timestamp) {
-    const date = new Date(timestamp);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
 
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'pm' : 'am';
-
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const formattedHours = String(hours).padStart(2, '0');
-
-    return `${day}/${month}/${year}; ${formattedHours}:${minutes}; ${ampm}`;
-}
 exports.getPillSchedule = (req, res) => {
     const deviceId = req.header('X-Device-ID');
     if (deviceId == null) {
@@ -155,7 +143,7 @@ exports.getPillSchedule = (req, res) => {
 
 exports.addPillDispensed = async (req, res) => {
     console.log("dispensed 191")
-  const { device_id, pill_id, dispense_time } = req.body;
+  const { device_id, pill_id, dispense_time, pill_slot } = req.body;
     console.log("dispensed 191",device_id, pill_id, dispense_time)
   if (!pill_id || !dispense_time) {
     return res.status(400).json({ error: 'Missing required fields' });
